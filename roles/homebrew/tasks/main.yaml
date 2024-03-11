@@ -13,6 +13,11 @@
     update_homebrew: yes
   when: brew_installed.rc == 0
 
+- name: Add the Homebrew tap
+  community.general.homebrew_tap:
+    name: koekeishiya/formulae
+    state: present
+
 - name: Install Homebrew packages
   homebrew:
     name: "{{ item }}"
@@ -28,6 +33,7 @@
     - zsh
     - nvim
     - tmux
+    - koekeishiya/formulae/yabai
     # workflow utils
     - jq
     - tree
@@ -40,3 +46,5 @@
     install_options: 'cask'
   with_items:
     - alfred
+
+

@@ -1,8 +1,8 @@
 - hosts: all
   become: no
   roles:
-    - alfred
     - homebrew
+    - alfred
     - git
     - kitty
     - zsh
