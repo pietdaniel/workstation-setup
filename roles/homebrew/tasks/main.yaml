@@ -22,6 +22,7 @@
     - git
     - wget
     # daily driver
+    - starship
     - zsh
     - nvim
     - tmux

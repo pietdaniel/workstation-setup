@@ -1,4 +1,10 @@
 ---
+- name: Create a directory if it does not exist
+  file:
+    path: "~/.config"
+    state: directory
+    mode: '0755'
+
 - name: Create symlink from source to destination
   ansible.builtin.file:
     src: "{{ role_path}}/files/{{ item.filename }}"

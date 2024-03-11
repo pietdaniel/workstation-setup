@@ -5,3 +5,6 @@ dotfiles_configs:
   - package: zsh
     filename: ".zshrc"
     path: "~"
+  - package: starship
+    filename: "starship.toml"
+    path: "~/.config"

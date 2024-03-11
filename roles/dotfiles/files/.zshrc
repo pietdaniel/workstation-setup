@@ -14,7 +14,6 @@ plugins=(
     zsh-completions
     zsh-interactive-cd
     zsh-navigation-tools
-    autoupdate
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -116,3 +115,5 @@ alias ta="tmux attach"
 
 # just aliases
 alias j=just
+
+eval "$(starship init zsh)"
