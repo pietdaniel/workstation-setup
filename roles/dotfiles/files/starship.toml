@@ -1,65 +1,94 @@
-
-format = "$all"
-right_format = """$git_branch$git_status$cmd_duration$directory"""
+# format = "$all"
+# right_format = """$git_branch$git_status$cmd_duration$directory"""
 
 # Disable the blank line at the start of the prompt
-add_newline = false
+# add_newline = false
 
+# [line_break]
+# disabled = true
+
+# [character]
+# success_symbol = " [s](#6791c9)"
+# error_symbol = " [t](#df5b61)"
+# vicmd_symbol = "[u](#78b892)"
+
+# [hostname]
+# ssh_only = true
+# format = "[$hostname](bold blue) "
+# disabled = false
+
+# [cmd_duration]
+# min_time = 1
+# format = "[a](fg:#232526 bg:none)[$duration]($style)[b](fg:#232526 bg:#232526)[c](fg:#bc83e3 bg:#232526)[](fg:#232526 bg:#bc83e3)[d](fg:#bc83e3 bg:none) "
+# disabled = false
+# style = "fg:#edeff0 bg:#232526"
+
+# [directory]
+# format = "[e](fg:#232526 bg:none)[$path]($style)[e](fg:#232526 bg:#232526)[f](fg:#6791c9 bg:#232526)[g](fg:#232526 bg:#6791c9)[h](fg:#6791c9 bg:none)"
+# style = "fg:#edeff0 bg:#232526"
+# truncation_length = 3
+# truncate_to_repo=false
+
+# [git_branch]
+# format = "[i](fg:#232526 bg:none)[$branch]($style)[j](fg:#232526 bg:#232526)[k](fg:#78b892 bg:#232526)[l](fg:#282c34 bg:#78b892)[m](fg:#78b892 bg:none) "
+# style = "fg:#edeff0 bg:#232526"
+
+# [git_status]
+# format="[n](fg:#232526 bg:none)[$all_status$ahead_behind]($style)[o](fg:#232526 bg:#232526)[p](fg:#67afc1 bg:#232526)[q](fg:#232526 bg:#67afc1)[r](fg:#67afc1 bg:none) "
+# style = "fg:#edeff0 bg:#232526"
+# conflicted = "="
+# ahead = "⇡${count}"
+# behind = "⇣${count}"
+# diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+# up_to_date = ""
+# untracked = "?${count}"
+# stashed = ""
+# modified = "!${count}"
+# staged = "+${count}"
+# renamed = "»${count}"
+# deleted = "${count}"
+
+# [git_commit]
+# format = "[\\($hash\\)]($style) [\\($tag\\)]($style)"
+# style = "green"
+
+# [git_state]
+# rebase = "REBASING"
+# merge =	"MERGING"
+# revert = "REVERTING"
+# cherry_pick = "CHERRY-PICKING"
+# bisect = "BISECTING"
+# am = "AM"
+# am_or_rebase = "AM/REBASE"
+# style =	"yellow"
+# format = '\([$state( $progress_current/$progress_total)]($style)\) '
+
+# Disable the default prompt order and modules you don't need
+prompt_order = ["line_break", "directory", "git_branch", "git_state", "status", "character"]
+
+# Configure the line break to ensure the prompt appears on a new line
 [line_break]
-disabled = true
-
-[character]
-success_symbol = " [s](#6791c9)"
-error_symbol = " [t](#df5b61)"
-vicmd_symbol = "[u](#78b892)"
-
-[hostname]
-ssh_only = true
-format = "[$hostname](bold blue) "
 disabled = false
 
-[cmd_duration]
-min_time = 1
-format = "[a](fg:#232526 bg:none)[$duration]($style)[b](fg:#232526 bg:#232526)[c](fg:#bc83e3 bg:#232526)[](fg:#232526 bg:#bc83e3)[d](fg:#bc83e3 bg:none) "
-disabled = false
-style = "fg:#edeff0 bg:#232526"
-
+# Customize the directory module
 [directory]
-format = "[e](fg:#232526 bg:none)[$path]($style)[e](fg:#232526 bg:#232526)[f](fg:#6791c9 bg:#232526)[g](fg:#232526 bg:#6791c9)[h](fg:#6791c9 bg:none)"
-style = "fg:#edeff0 bg:#232526"
 truncation_length = 3
-truncate_to_repo=false
+truncate_to_repo = true
+format = "↱ $path"  # Custom format starting with your desired symbol
 
+# Configure Git branch settings
 [git_branch]
-format = "[i](fg:#232526 bg:none)[$branch]($style)[j](fg:#232526 bg:#232526)[k](fg:#78b892 bg:#232526)[l](fg:#282c34 bg:#78b892)[m](fg:#78b892 bg:none) "
-style = "fg:#edeff0 bg:#232526"
+format = " [$symbol$branch]($style) "  # Custom format including branch name
+symbol = ""  # Remove the default symbol to only display the branch name
 
-[git_status]
-format="[n](fg:#232526 bg:none)[$all_status$ahead_behind]($style)[o](fg:#232526 bg:#232526)[p](fg:#67afc1 bg:#232526)[q](fg:#232526 bg:#67afc1)[r](fg:#67afc1 bg:none) "
-style = "fg:#edeff0 bg:#232526"
-conflicted = "="
-ahead = "⇡${count}"
-behind = "⇣${count}"
-diverged = "⇕⇡${ahead_count}⇣${behind_count}"
-up_to_date = ""
-untracked = "?${count}"
-stashed = ""
-modified = "!${count}"
-staged = "+${count}"
-renamed = "»${count}"
-deleted = "${count}"
+# Configure the command prompt symbol and style
+[character]
+success_symbol = "[↳ λ](bold green)"  # Symbol displayed on command prompt line after successful command
+error_symbol = "[↳ λ](bold red)"  # Symbol displayed on command prompt line after failed command
 
-[git_commit]
-format = "[\\($hash\\)]($style) [\\($tag\\)]($style)"
-style = "green"
-
-[git_state]
-rebase = "REBASING"
-merge =	"MERGING"
-revert = "REVERTING"
-cherry_pick = "CHERRY-PICKING"
-bisect = "BISECTING"
-am = "AM"
-am_or_rebase = "AM/REBASE"
-style =	"yellow"
-format = '\([$state( $progress_current/$progress_total)]($style)\) '
+# Configure the status module to show exit code
+[status]
+format = "[$symbol$status]($style) "  # Custom format for status
+symbol = "1 ↵"  # Custom symbol to display when there is a non-zero exit code
+style = "bold red"
+disabled = false  # Ensure the status module is enabled
