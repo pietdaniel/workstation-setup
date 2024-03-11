@@ -64,7 +64,7 @@
 # format = '\([$state( $progress_current/$progress_total)]($style)\) '
 
 # Disable the default prompt order and modules you don't need
-prompt_order = ["line_break", "directory", "git_branch", "git_state", "status", "character"]
+# prompt_order = ["line_break", "directory", "git_branch", "git_state", "status", "character"]
 
 # Configure the line break to ensure the prompt appears on a new line
 [line_break]
