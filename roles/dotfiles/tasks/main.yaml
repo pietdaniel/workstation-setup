@@ -1,30 +1,27 @@
 ---
-- name: Ensure the ~/dotfiles directory exists
+- name: Ensure the dotfiles directories exist
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/dotfiles"
+    path: "{{ lookup('env', 'HOME') }}/dotfiles/{{ item.package }}"
     state: directory
     mode: '0755'
+  loop: "{{ dotfiles_configs }}"
 
-- name: Ensure the ~/dotfiles/tmux directory exists
-  ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/dotfiles/tmux"
-    state: directory
-    mode: '0755'
-
-- name: Copy .tmux.conf to ~/dotfiles/tmux/
+- name: Copy dotfiles to their respective directories
   ansible.builtin.copy:
-    src: ".tmux.conf"
-    dest: "{{ ansible_env.HOME }}/dotfiles/tmux/.tmux.conf"
+    src: "{{ item.filename }}"
+    dest: "{{ lookup('env', 'HOME') }}/dotfiles/{{ item.package }}/{{ item.filename }}"
     mode: '0644'
+  loop: "{{ dotfiles_configs }}"
 
 - name: Install GNU Stow
   ansible.builtin.package:
     name: stow
     state: present
-
-- name: Run Stow to manage the tmux dotfiles
-  ansible.builtin.command:
-    cmd: stow tmux
-    chdir: "{{ ansible_env.HOME }}/dotfiles"
-    warn: false  # 'stow' might not be recognized as a safe command
   when: ansible_facts.pkg_mgr == 'homebrew' or ansible_facts.pkg_mgr == 'apt'
+
+- name: Run Stow for each package
+  ansible.builtin.command:
+    cmd: stow {{ item.package }}
+    chdir: "{{ lookup('env', 'HOME') }}/dotfiles"
+    warn: false
+  loop: "{{ dotfiles_configs }}"
