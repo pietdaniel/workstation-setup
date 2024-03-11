@@ -14,3 +14,9 @@ dotfiles_configs:
   - package: vim
     filename: "config.lua"
     path: "~/.config/nvim/lua"
+  - package: yabai
+    filename: ".yabairc"
+    path: "~"
+  - package: skhd
+    filename: ".skhdrc"
+    path: "~"
