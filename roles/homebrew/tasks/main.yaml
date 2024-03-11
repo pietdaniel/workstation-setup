@@ -30,3 +30,7 @@
     - jq
     - tree
     - watch
+
+- name: Install Kitty terminal
+  command: >
+    curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
