@@ -3,5 +3,6 @@
   roles:
     - { role: homebrew, become: no }
     - { role: zsh, become: no }
+    - { role: nvim, become: no }
     - { role: dotfiles, become: no }
     - macos
