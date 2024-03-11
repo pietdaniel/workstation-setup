@@ -1,0 +1,23 @@
+---
+- name: Check if Homebrew is installed
+  command: which brew
+  register: brew_installed
+  ignore_errors: yes
+
+- name: Install Homebrew
+  shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  when: brew_installed.rc != 0
+
+- name: Update Homebrew
+  homebrew:
+    update_homebrew: yes
+  when: brew_installed.rc == 0
+
+- name: Install Homebrew packages
+  homebrew:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - git
+    - wget
+  become: yes
