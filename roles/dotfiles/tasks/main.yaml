@@ -1,7 +1,7 @@
 ---
 - name: Create symlink from source to destination
   ansible.builtin.file:
-    src: "{{ item.filename }}"
+    src: "{{ role_path}}/files/{{ item.filename }}"
     dest: "{{ item.path }}/{{ item.filename }}"
     state: link
     force: yes
