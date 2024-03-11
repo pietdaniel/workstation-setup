@@ -1,9 +1,10 @@
 - hosts: all
   become: no
   roles:
+    - alfred
+    - homebrew
     - git
     - kitty
-    - homebrew
     - zsh
     - nvim
     - dotfiles

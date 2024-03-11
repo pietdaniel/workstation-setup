@@ -32,3 +32,11 @@
     - jq
     - tree
     - watch
+
+- name: Install Homebrew Cask packages
+  homebrew:
+    name: "{{ item }}"
+    state: present
+    install_options: 'cask'
+  with_items:
+    - alfred

@@ -24,12 +24,6 @@
     state: directory
     mode: '0700'
 
-- name: Set SSH URL instead of HTTPS for GitHub
-  git_config:
-    name: url."git@github.com:".insteadOf
-    value: "https://github.com/"
-    scope: global
-
 - name: Disable automatic rebasing on git pull
   git_config:
     name: pull.rebase
