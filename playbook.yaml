@@ -2,3 +2,4 @@
   become: yes
   roles:
     - { role: homebrew, become: no }
+    - macos
