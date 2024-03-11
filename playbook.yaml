@@ -1,4 +1,4 @@
 - hosts: all
   become: yes
   roles:
-    - homebrew
+    - { role: homebrew, become: no }
