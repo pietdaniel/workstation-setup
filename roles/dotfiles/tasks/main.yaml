@@ -1,11 +1,30 @@
 ---
-- name: Ensure GNU Stow is installed
+- name: Ensure the ~/dotfiles directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/dotfiles"
+    state: directory
+    mode: '0755'
+
+- name: Ensure the ~/dotfiles/tmux directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/dotfiles/tmux"
+    state: directory
+    mode: '0755'
+
+- name: Copy .tmux.conf to ~/dotfiles/tmux/
+  ansible.builtin.copy:
+    src: ".tmux.conf"
+    dest: "{{ ansible_env.HOME }}/dotfiles/tmux/.tmux.conf"
+    mode: '0644'
+
+- name: Install GNU Stow
   ansible.builtin.package:
     name: stow
     state: present
 
-- name: Stow dotfiles
+- name: Run Stow to manage the tmux dotfiles
   ansible.builtin.command:
-    cmd: "stow -v -R -t {{ ansible_env.HOME }} {{ item }}"
-    chdir: "{{ playbook_dir }}/roles/dotfiles/files"
-  loop: "{{ query('ansible.builtin.fileglob', '{{ playbook_dir }}/roles/dotfiles/files/*', wantlist=True) | map('basename') }}"
+    cmd: stow tmux
+    chdir: "{{ ansible_env.HOME }}/dotfiles"
+    warn: false  # 'stow' might not be recognized as a safe command
+  when: ansible_facts.pkg_mgr == 'homebrew' or ansible_facts.pkg_mgr == 'apt'

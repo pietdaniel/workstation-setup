@@ -22,9 +22,10 @@
     - git
     - wget
     # daily driver
+    - stow
     - nvim
     - tmux
-    # utils
+    # workflow utils
     - jq
     - tree
     - watch
