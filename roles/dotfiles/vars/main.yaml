@@ -1,0 +1,3 @@
+dotfiles_configs:
+  - package: tmux
+    filename: .tmux.conf
