@@ -22,6 +22,4 @@
 - name: Run Stow for each package
   ansible.builtin.command:
     cmd: stow {{ item.package }}
-    chdir: "{{ lookup('env', 'HOME') }}/dotfiles"
-    warn: false
   loop: "{{ dotfiles_configs }}"
