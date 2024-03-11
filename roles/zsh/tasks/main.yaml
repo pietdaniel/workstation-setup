@@ -1,16 +1,30 @@
 ---
-- name: Install Oh My Zsh for a specific user
-  become_user: "{{ target_user }}"
-  shell: sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-  args:
-    executable: /bin/bash
-    creates: "/User/{{ target_user }}/.oh-my-zsh"
-  environment:
-    RUNZSH: 'no'
-    CHSH: 'no'
-    ZSH: "/User/{{ target_user }}/.oh-my-zsh"
+- name: Install Oh My Zsh # noqa: latest
+  ansible.builtin.git:
+    repo: https://github.com/ohmyzsh/ohmyzsh.git
+    dest: ~/.oh-my-zsh
+    depth: 1
 
-- name: Change shell to zsh
-  user:
-    name: "{{ target_user }}"
+- name: Install zsh-completions plugin # noqa: latest
+  ansible.builtin.git:
+    repo: https://github.com/zsh-users/zsh-completions
+    dest: ~/.oh-my-zsh/custom/plugins/zsh-completions
+    depth: 1
+
+- name: Install zsh-autosuggestions plugin # noqa: latest
+  ansible.builtin.git:
+    repo: https://github.com/zsh-users/zsh-autosuggestions
+    dest: ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+    depth: 1
+
+- name: Install zsh-syntax-highlighting plugin # noqa: latest
+  ansible.builtin.git:
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+    dest: ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+    depth: 1
+
+- name: Change user shell to zsh
+  become: true
+  ansible.builtin.user:
+    name: "{{ ansible_user_id }}"
     shell: /bin/zsh

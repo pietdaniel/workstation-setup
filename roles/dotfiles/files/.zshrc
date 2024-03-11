@@ -2,6 +2,23 @@
 export HOMEBREW_NO_INSECURE_REDIRECT=1
 export HOMEBREW_CASK_OPTS=--require-sha
 
+# oh-my-zsh
+export ZSH="$HOME/.oh-my-zsh"
+
+plugins=(
+    git
+    aliases
+    branch
+    zsh-autosuggestions
+    zsh-syntax-highlighting
+    zsh-completions
+    zsh-interactive-cd
+    zsh-navigation-tools
+    autoupdate
+)
+
+source $ZSH/oh-my-zsh.sh
+
 # easy extraction of various file types
 extract () {
   if [ -f $1 ] ; then
