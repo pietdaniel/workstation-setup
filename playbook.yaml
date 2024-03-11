@@ -1,5 +1,6 @@
 - hosts: all
   become: yes
   roles:
-    - { role: homebrew, become: no }
+    - { role: dotfiles, become: no }
     - macos
+    - { role: homebrew, become: no }

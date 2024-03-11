@@ -1,0 +1,11 @@
+---
+- name: Ensure GNU Stow is installed
+  ansible.builtin.package:
+    name: stow
+    state: present
+
+- name: Stow dotfiles
+  ansible.builtin.command:
+    cmd: "stow -v -R -t {{ ansible_env.HOME }} {{ item }}"
+    chdir: "{{ playbook_dir }}/roles/dotfiles/files"
+  loop: "{{ query('ansible.builtin.fileglob', '{{ playbook_dir }}/roles/dotfiles/files/*', wantlist=True) | map('basename') }}"
