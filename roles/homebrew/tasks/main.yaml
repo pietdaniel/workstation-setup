@@ -20,4 +20,3 @@
   with_items:
     - git
     - wget
-  become: yes
