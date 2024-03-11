@@ -23,3 +23,9 @@
   ansible.builtin.command:
     cmd: "cd {{ lookup('env', 'HOME') }}/dotfiles && stow {{ item.package }}"
   loop: "{{ dotfiles_configs }}"
+  register: stow_output
+  ignore_errors: yes
+
+- name: Show Stow output
+  ansible.builtin.debug:
+    msg: "{{ stow_output }}"

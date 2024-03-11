@@ -19,7 +19,7 @@ fi
 if command -v ansible > /dev/null; then
     echo "Ansible is installed. Running the playbook..."
     # Run your Ansible playbook here. Replace 'your_playbook.yml' with the path to your playbook
-    ansible-playbook -i localhost, playbook.yaml --connection=local
+    ansible-playbook -vvv -i localhost, playbook.yaml --connection=local
 else
     echo "Failed to install Ansible. Exiting..."
     exit 1
