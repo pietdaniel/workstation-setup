@@ -110,5 +110,11 @@ au FileType markdown setl sw=2 et tabstop=2 sts=2
 au FileType yaml setl sw=2 et tabstop=2 sts=2 smartindent ai
 au FileType yml setl sw=2 et tabstop=2 sts=2 smartindent ai
 
+" == PLUGIN config ==
+
+" nerdtree
+map <Leader>n :NERDTreeToggle<CR>
+
 " LUA
 lua require('config')
+
