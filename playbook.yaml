@@ -1,8 +1,9 @@
 - hosts: all
-  become: yes
+  become: no
   roles:
-    - { role: homebrew, become: no }
-    - { role: zsh, become: no }
-    - { role: nvim, become: no }
-    - { role: dotfiles, become: no }
-    - macos
+    - kitty
+    - homebrew
+    - zsh
+    - nvim
+    - dotfiles
+    - { role: macos, become: yes }
