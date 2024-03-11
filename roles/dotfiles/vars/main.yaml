@@ -8,3 +8,6 @@ dotfiles_configs:
   - package: starship
     filename: "starship.toml"
     path: "~/.config"
+  - package: vim
+    filename: "init.lua"
+    path: "~/.config/nvim"
