@@ -1,4 +1,5 @@
 ---
+# These preferences are a moment in time preference from 2024-03-11
 - name: Unzip preferences
   ansible.builtin.unarchive:
     src: "prefs.zip"
