@@ -18,5 +18,13 @@
     name: "{{ item }}"
     state: present
   with_items:
+    # system utils
     - git
     - wget
+    # daily driver
+    - nvim
+    - tmux
+    # utils
+    - jq
+    - tree
+    - watch
