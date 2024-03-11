@@ -21,5 +21,5 @@
 
 - name: Run Stow for each package
   ansible.builtin.command:
-    cmd: stow {{ item.package }}
+    cmd: "cd {{ lookup('env', 'HOME') }}/dotfiles && stow {{ item.package }}"
   loop: "{{ dotfiles_configs }}"
