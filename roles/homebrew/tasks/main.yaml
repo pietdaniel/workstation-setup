@@ -22,7 +22,6 @@
     - git
     - wget
     # daily driver
-    - stow
     - nvim
     - tmux
     # workflow utils

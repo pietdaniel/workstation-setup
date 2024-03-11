@@ -1,19 +1,8 @@
 ---
-- name: Ensure the dotfiles directories exist
+- name: Create symlink from source to destination
   ansible.builtin.file:
-    path: "{{ lookup('env', 'HOME') }}/dotfiles/{{ item.package }}"
-    state: directory
-    mode: '0755'
-  loop: "{{ dotfiles_configs }}"
-
-- name: Copy dotfiles to their respective directories
-  ansible.builtin.copy:
     src: "{{ item.filename }}"
-    dest: "{{ lookup('env', 'HOME') }}/dotfiles/{{ item.package }}/{{ item.filename }}"
-    mode: '0644'
-  loop: "{{ dotfiles_configs }}"
-
-- name: Run Stow for each package
-  command: >
-    cd {{ lookup('env', 'HOME') }}/dotfiles && stow {{ item.package }} -v
+    dest: "{{ item.path }}/{{ item.filename }}"
+    state: link
+    force: yes
   loop: "{{ dotfiles_configs }}"
