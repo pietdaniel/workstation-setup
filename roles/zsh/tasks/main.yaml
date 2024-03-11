@@ -1,0 +1,16 @@
+---
+- name: Install Oh My Zsh for a specific user
+  become_user: "{{ target_user }}"
+  shell: sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  args:
+    executable: /bin/bash
+    creates: "/User/{{ target_user }}/.oh-my-zsh"
+  environment:
+    RUNZSH: 'no'
+    CHSH: 'no'
+    ZSH: "/User/{{ target_user }}/.oh-my-zsh"
+
+- name: Change shell to zsh
+  user:
+    name: "{{ target_user }}"
+    shell: /bin/zsh
