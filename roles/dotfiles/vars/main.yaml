@@ -13,4 +13,4 @@ dotfiles_configs:
     path: "~/.config/nvim"
   - package: vim
     filename: "config.lua"
-    path: "~/.config/nvim"
+    path: "~/.config/nvim/lua"
