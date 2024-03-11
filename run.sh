@@ -23,3 +23,7 @@ else
     echo "Failed to install Ansible. Exiting..."
     exit 1
 fi
+
+echo "If this is the first time be sure to run"
+echo "yabai --start-service"
+echo "skhd --start-service"
