@@ -1,0 +1,6 @@
+---
+- name: Unzip preferences
+  ansible.builtin.unarchive:
+    src: "prefs.zip"
+    destination: "~/Library/Application Support/Alfred/Alfred.alfredpreferences"
+    creates: "~/Library/Application Support/Alfred/Alfred.alfredpreferences"
