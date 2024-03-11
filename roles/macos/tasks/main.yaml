@@ -1,0 +1,12 @@
+---
+- name: Swap Caps Lock and Escape keys on macOS
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Set keyboard preferences
+      command: defaults write -g "com.apple.keyboard.modifiermapping" '(
+                    { "HIDKeyboardModifierMappingDst" = 30064771113; "HIDKeyboardModifierMappingSrc" = 30064771129; },
+                    { "HIDKeyboardModifierMappingDst" = 30064771129; "HIDKeyboardModifierMappingSrc" = 30064771113; }
+                )'
+      args:
+        executable: /bin/bash
