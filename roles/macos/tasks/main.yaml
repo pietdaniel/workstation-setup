@@ -2,3 +2,11 @@
 - name: Set keyboard preferences
   command: >
     hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x700000039,"HIDKeyboardModifierMappingDst":0x700000029},{"HIDKeyboardModifierMappingSrc":0x700000029,"HIDKeyboardModifierMappingDst":0x700000039}]}'
+
+- name: Dock Left
+  become: no
+  command: >
+    sh -c "defaults write com.apple.dock orientation -string left;
+    defaults write com.apple.dock autohide -bool true;
+    defaults write com.apple.dock tilesize -int 16;
+    killall Dock"

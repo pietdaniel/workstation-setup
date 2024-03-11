@@ -1,6 +1,7 @@
 - hosts: all
   become: no
   roles:
+    - { role: macos, become: yes }
     - homebrew
     - alfred
     - git
@@ -8,4 +9,3 @@
     - zsh
     - nvim
     - dotfiles
-    - { role: macos, become: yes }
