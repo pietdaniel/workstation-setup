@@ -1,11 +1,19 @@
 ---
+- name: Check for Kitty app in /Applications
+  ansible.builtin.stat:
+    path: /Applications/kitty.app
+  register: kitty_app
+
 - name: Download Kitty installer script
   ansible.builtin.get_url:
     url: https://sw.kovidgoyal.net/kitty/installer.sh
     dest: /tmp/installer.sh
     mode: '0755'
+  when: not kitty_app.stat.exists
+
 
 - name: Run Kitty installer script
   ansible.builtin.command:
     cmd: /tmp/installer.sh launch=n
     creates: /opt/kitty.app/bin/kitty  # Adjust this if the installation path differs
+  when: not kitty_app.stat.exists

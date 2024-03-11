@@ -1,0 +1,50 @@
+---
+- name: Set global Git user name
+  git_config:
+    name: user.name
+    value: "{{ git_user_name }}"
+    scope: global
+
+- name: Set global Git user email
+  git_config:
+    name: user.email
+    value: "{{ git_user_email }}"
+    scope: global
+
+
+- name: Set global Git user email
+  git_config:
+    name: pull.rebae
+    value: "{{ git_user_email }}"
+    scope: global
+
+- name: Ensure SSH directory exists
+  file:
+    path: "{{ ansible_env.HOME }}/.ssh"
+    state: directory
+    mode: '0700'
+
+- name: Set SSH URL instead of HTTPS for GitHub
+  git_config:
+    name: url."git@github.com:".insteadOf
+    value: "https://github.com/"
+    scope: global
+
+- name: Disable automatic rebasing on git pull
+  git_config:
+    name: pull.rebase
+    value: false
+    scope: global
+
+- name: Disable pager for git branch
+  git_config:
+    name: pager.branch
+    value: false
+    scope: global
+
+- name: Generate SSH key for Git (if it does not exist)
+  community.crypto.openssh_keypair:
+    path: "{{ ansible_env.HOME }}/.ssh/id_rsa"
+    type: rsa
+    size: 2048
+    force: no
