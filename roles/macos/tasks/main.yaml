@@ -1,8 +1,5 @@
 ---
 - name: Set keyboard preferences
-  command: defaults write -g "com.apple.keyboard.modifiermapping" '(
-                { "HIDKeyboardModifierMappingDst" = 30064771113; "HIDKeyboardModifierMappingSrc" = 30064771129; },
-                { "HIDKeyboardModifierMappingDst" = 30064771129; "HIDKeyboardModifierMappingSrc" = 30064771113; }
-            )'
-  args:
-    executable: /bin/bash
+  command: >
+    hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x700000039,"HIDKeyboardModifierMappingDst":0x700000029},{"HIDKeyboardModifierMappingSrc":0x700000029,"HIDKeyboardModifierMappingDst":0x700000039}]}'
+
