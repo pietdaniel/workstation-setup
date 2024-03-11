@@ -13,19 +13,7 @@
     mode: '0644'
   loop: "{{ dotfiles_configs }}"
 
-- name: Install GNU Stow
-  ansible.builtin.package:
-    name: stow
-    state: present
-  when: ansible_facts.pkg_mgr == 'homebrew' or ansible_facts.pkg_mgr == 'apt'
-
 - name: Run Stow for each package
-  ansible.builtin.command:
-    cmd: "cd {{ lookup('env', 'HOME') }}/dotfiles && stow {{ item.package }}"
+  command: >
+    cd {{ lookup('env', 'HOME') }}/dotfiles && stow {{ item.package }} -v
   loop: "{{ dotfiles_configs }}"
-  register: stow_output
-  ignore_errors: yes
-
-- name: Show Stow output
-  ansible.builtin.debug:
-    msg: "{{ stow_output }}"
