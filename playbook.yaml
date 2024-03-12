@@ -1,10 +1,11 @@
 - hosts: all
   become: no
   roles:
+    - scripts
+    - dotfiles
     - { role: macos, become: yes }
     - homebrew
     - git
     - kitty
     - zsh
     - nvim
-    - dotfiles

@@ -1,5 +1,6 @@
 # Path
 export PATH="${PATH?}:/Users/piet/scripts"
+export PATH="${PATH?}:/Users/rokt/scripts"
 
 # Force certain more-secure behaviours from homebrew
 export HOMEBREW_NO_INSECURE_REDIRECT=1
