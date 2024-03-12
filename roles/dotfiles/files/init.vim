@@ -43,6 +43,9 @@ set updatetime=300
 " don't give |ins-completion-menu| messages.
 set shortmess+=c
 
+set background=dark
+colorscheme gruvbox
+
 " == CUSTOM COMMANDS ==
 
 " Move cursor while scrolling
