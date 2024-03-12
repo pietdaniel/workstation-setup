@@ -10,3 +10,24 @@
     defaults write com.apple.dock autohide -bool true;
     defaults write com.apple.dock tilesize -int 16;
     killall Dock"
+
+- name: Create Go workspace directory
+  become: no
+  file:
+    path: "{{ ansible_env.HOME }}/go"
+    state: directory
+    mode: '0755'
+
+- name: Create src directory for GitHub projects
+  become: no
+  file:
+    path: "{{ ansible_env.HOME }}/go/src/github.com"
+    state: directory
+    mode: '0755'
+
+- name: Create hacks folder
+  become: no
+  file:
+    path: "{{ ansible_env.HOME }}/hacks"
+    state: directory
+    mode: '0755'

@@ -47,9 +47,12 @@
     - watch
     - fzf
     - the_silver_searcher
+    - htop
     # cloud utils
     - awscli
     - aws-vault
+    # languages
+    - go
 
 - name: Install Homebrew Cask packages
   homebrew:
