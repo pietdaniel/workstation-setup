@@ -1,5 +1,7 @@
 ---
 # These preferences are a moment in time preference from 2024-03-11
+# They currently dont work because the zip extracts as /Users/... instead of just Alfred.alfredpreferences
+# It also doesnt work on a fresh install because Alfred needs to boot once to create its folders
 - name: Unzip preferences
   ansible.builtin.unarchive:
     src: "prefs.zip"

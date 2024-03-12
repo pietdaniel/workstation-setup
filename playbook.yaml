@@ -3,7 +3,6 @@
   roles:
     - { role: macos, become: yes }
     - homebrew
-    - alfred
     - git
     - kitty
     - zsh
