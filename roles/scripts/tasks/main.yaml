@@ -1,0 +1,7 @@
+---
+- name: Ensure the symlink exists
+  ansible.builtin.file:
+    src: "{{ role_path }}/files"
+    dest: "~/scripts"
+    state: link
+    force: yes

@@ -1,3 +1,6 @@
+# Path
+export PATH="${PATH?}:/Users/piet/scripts"
+
 # Force certain more-secure behaviours from homebrew
 export HOMEBREW_NO_INSECURE_REDIRECT=1
 export HOMEBREW_CASK_OPTS=--require-sha
