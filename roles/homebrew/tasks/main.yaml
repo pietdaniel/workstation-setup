@@ -20,7 +20,7 @@
 
 - name: Add the Homebrew tap
   community.general.homebrew_tap:
-    name: homebrew/cask-font
+    name: homebrew/cask-fonts
     state: present
 
 - name: Install Homebrew packages
