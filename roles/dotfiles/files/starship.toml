@@ -67,28 +67,75 @@
 # prompt_order = ["line_break", "directory", "git_branch", "git_state", "status", "character"]
 
 # Configure the line break to ensure the prompt appears on a new line
-[line_break]
-disabled = false
+# [line_break]
+# disabled = false
 
 # Customize the directory module
-[directory]
-truncation_length = 3
-truncate_to_repo = true
-format = "↱ $path"  # Custom format starting with your desired symbol
+# [directory]
+# truncation_length = 3
+# truncate_to_repo = true
+# format = "↱ $path"  # Custom format starting with your desired symbol
 
 # Configure Git branch settings
-[git_branch]
-format = " [$symbol$branch]($style) "  # Custom format including branch name
-symbol = ""  # Remove the default symbol to only display the branch name
+# [git_branch]
+# format = " [$symbol$branch]($style) "  # Custom format including branch name
+# symbol = ""  # Remove the default symbol to only display the branch name
 
 # Configure the command prompt symbol and style
-[character]
-success_symbol = "[↳ λ](bold green)"  # Symbol displayed on command prompt line after successful command
-error_symbol = "[↳ λ](bold red)"  # Symbol displayed on command prompt line after failed command
+# [character]
+# success_symbol = "[↳ λ](bold green)"  # Symbol displayed on command prompt line after successful command
+# error_symbol = "[↳ λ](bold red)"  # Symbol displayed on command prompt line after failed command
 
 # Configure the status module to show exit code
-[status]
-format = "[$symbol$status]($style) "  # Custom format for status
-symbol = "1 ↵"  # Custom symbol to display when there is a non-zero exit code
-style = "bold red"
-disabled = false  # Ensure the status module is enabled
+# [status]
+# format = "[$symbol$status]($style) "  # Custom format for status
+# symbol = "1 ↵"  # Custom symbol to display when there is a non-zero exit code
+# style = "bold red"
+# disabled = false  # Ensure the status module is enabled
+
+format = """
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_state\
+$git_status\
+$cmd_duration\
+$line_break\
+$python\
+$character"""
+
+[directory]
+style = "blue"
+
+[character]
+success_symbol = "[❯](purple)"
+error_symbol = "[❯](red)"
+vimcmd_symbol = "[❮](green)"
+
+[git_branch]
+format = "[$branch]($style)"
+style = "bright-black"
+
+[git_status]
+format = "[[(*$conflicted$untracked$modified$staged$renamed$deleted)](218) ($ahead_behind$stashed)]($style)"
+style = "cyan"
+conflicted = "​"
+untracked = "​"
+modified = "​"
+staged = "​"
+renamed = "​"
+deleted = "​"
+stashed = "≡"
+
+[git_state]
+format = '\([$state( $progress_current/$progress_total)]($style)\) '
+style = "bright-black"
+
+[cmd_duration]
+format = "[$duration]($style) "
+style = "yellow"
+
+[python]
+format = "[$virtualenv]($style) "
+style = "bright-black"
