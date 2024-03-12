@@ -45,6 +45,7 @@
     - jq
     - tree
     - watch
+    - fzf
 
 - name: Install Homebrew Cask packages
   homebrew:
