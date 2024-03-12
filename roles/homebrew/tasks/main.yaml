@@ -48,6 +48,7 @@
     - fzf
     - the_silver_searcher
     - htop
+    - tldr
     # cloud utils
     - awscli
     - aws-vault

@@ -120,4 +120,12 @@ alias ta="tmux attach"
 # just aliases
 alias j=just
 
+# == ROKT Specifics ==
+
+# Quickly fuzzy find projects
+cdr () {
+  A_DIRECTORY=`ls ~/ROKT | fzf`
+  cdls ~/ROKT/$A_DIRECTORY
+}
+
 eval "$(starship init zsh)"
