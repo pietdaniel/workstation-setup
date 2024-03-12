@@ -46,6 +46,7 @@
     - tree
     - watch
     - fzf
+    - the_silver_searcher
 
 - name: Install Homebrew Cask packages
   homebrew:
