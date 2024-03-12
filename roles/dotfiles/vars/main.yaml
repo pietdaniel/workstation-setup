@@ -20,3 +20,6 @@ dotfiles_configs:
   - package: skhd
     filename: ".skhdrc"
     path: "~"
+  - package: kitty
+    filename: "kitty.conf"
+    path: "~/.config/kitty"
