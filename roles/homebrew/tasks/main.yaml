@@ -49,6 +49,7 @@
     - the_silver_searcher
     - htop
     - tldr
+    - just
     # cloud utils
     - awscli
     - aws-vault

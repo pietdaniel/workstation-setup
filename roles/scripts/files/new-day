@@ -1,0 +1,3 @@
+#!/bin/bash
+new-day-prepender
+nvim ~/notes.txt

@@ -1,0 +1,5 @@
+#!/bin/bash
+USER=`whoami`
+cat /Users/$USER/notes.txt > /tmp/notes-backup.txt
+/Users/$USER/scripts/new-day-header > /tmp/new-day-header
+cat /tmp/new-day-header /tmp/notes-backup.txt > /Users/$USER/notes.txt

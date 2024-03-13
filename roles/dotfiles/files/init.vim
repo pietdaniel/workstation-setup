@@ -123,3 +123,7 @@ let $FZF_DEFAULT_COMMAND = 'ag -g ""'
 nnoremap <silent> <C-f> :Files<CR>
 nnoremap <silent> <C-g> :GFiles<CR>
 nnoremap <silent> <S-t> :BTags<CR>
+
+" NERDTree
+let NERDTreeShowHidden=1
+

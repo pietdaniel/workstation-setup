@@ -22,6 +22,50 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
+# git override, requires oh-my-zsh git plugin
+unalias gap
+gap () {
+    if [ "$(git_current_branch)" = "master" ]; then
+      echo "You sure you want to do this on master"
+    else
+      git add -A && git commit -n -m $1 && git push origin $(git_current_branch)
+    fi
+}
+
+function gapf() {
+    git add -A && git commit -n -m $1 && git push origin $(git_current_branch)
+}
+
+function gitsearch() {
+    git --no-pager log -S "$1" --source --all
+}
+
+function git-master-branch-name() {
+  VERBOSE_NAME=`git symbolic-ref refs/remotes/origin/HEAD`
+  echo $VERBOSE_NAME | sed -e 's/refs\/remotes\/origin\///'
+}
+
+# The above function fails sometimes, this script fixes it
+alias fixmaster="git symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/master"
+
+function gcom() {
+  git checkout `git-master-branch-name`
+}
+
+# Git aliases
+alias gdc='git diff --cached'
+alias gm='git merge --squash --no-commit'
+alias gmcsg='gcmsg'
+alias gacmsg='git add -A && git commit -m'
+alias gcop='git checkout prod'
+alias gpod='git pull origin prod'
+alias gpom='git pull origin master'
+alias gdc='git diff --cached'
+alias gsc="git --no-pager shortlog -s -n"
+alias gpod='git pull origin prod'
+alias gpom='git pull origin master'
+alias gdc='git diff --cached'
+
 # easy extraction of various file types
 extract () {
   if [ -f $1 ] ; then
@@ -85,17 +129,6 @@ alias senv='source ./venv/bin/activate'
 alias serve='python -m http.server'
 alias urldecode='python -c "import sys, urllib.parse as ul; print(ul.unquote_plus(sys.argv[1]))"'
 alias urlencode='python -c "import sys, urllib.parse as ul; print(ul.quote_plus(sys.argv[1]))"'
-
-# Git aliases
-alias gdc='git diff --cached'
-alias gm='git merge --squash --no-commit'
-alias gmcsg='gcmsg'
-alias gacmsg='git add -A && git commit -m'
-alias gcop='git checkout prod'
-alias gpod='git pull origin prod'
-alias gpom='git pull origin master'
-alias gdc='git diff --cached'
-alias gsc="git --no-pager shortlog -s -n"
 
 # Vim aliases
 alias v=nvim

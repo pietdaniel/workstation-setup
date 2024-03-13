@@ -3,7 +3,9 @@
   roles:
     - scripts
     - dotfiles
-    - { role: macos, become: yes }
+    - role: macos
+      become: yes
+      tags: macos
     - homebrew
     - git
     - kitty

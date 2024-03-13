@@ -1,0 +1,18 @@
+#!/usr/bin/env python3
+from os import popen, path
+from time import strftime
+
+filename =  "/usr/local/opt/new-day-counter/count"
+
+if not path.exists(filename):
+    with open(filename, 'w') as file:
+        file.write("0")
+
+count_file = open(filename, "r")
+count = int(count_file.read())
+count_file.close()
+new_count = count + 1
+time_string = strftime("%m/%d/%Y %H:%M %p")
+print("Day %s - %s" % (new_count, time_string))
+print("----------------")
+popen("echo %s > /usr/local/opt/new-day-counter/count" % new_count)

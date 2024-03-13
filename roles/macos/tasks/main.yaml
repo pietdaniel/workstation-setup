@@ -31,3 +31,17 @@
     path: "{{ ansible_env.HOME }}/hacks"
     state: directory
     mode: '0755'
+
+- name: Create opt folder
+  file:
+    path: "/usr/local/opt/"
+    state: directory
+    mode: '0755'
+    owner: "{{ ansible_user_id }}"
+
+- name: Create new-day-counter folder for new-day script
+  file:
+    path: "/usr/local/opt/new-day-counter"
+    state: directory
+    mode: '0755'
+    owner: "{{ ansible_user_id }}"
