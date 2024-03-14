@@ -2,6 +2,11 @@
 export PATH="${PATH?}:/Users/piet/scripts"
 export PATH="${PATH?}:/Users/rokt/scripts"
 
+# Go
+export GOPATH="${HOME?}/go"
+export GOROOT="$(go env GOROOT)"
+export PATH="$PATH:$HOME/go/bin:$HOME/bin"
+
 # Force certain more-secure behaviours from homebrew
 export HOMEBREW_NO_INSECURE_REDIRECT=1
 export HOMEBREW_CASK_OPTS=--require-sha
@@ -153,7 +158,21 @@ alias ta="tmux attach"
 # just aliases
 alias j=just
 
-# == ROKT Specifics ==
+# opens my notes
+function notes() {
+  SWAPPATH="/Users/piet/.vim/swapfiles/notes.txt.swp"
+  if [ "$1" = "-f" ]; then
+    nvim ~/notes.txt
+  else
+    if [ ! -f "$SWAPPATH"  ]; then
+      nvim ~/notes.txt
+    else
+      echo "Swap Exists"
+    fi
+  fi
+}
+
+# =vv ROKT Specifics vv=
 
 # Quickly fuzzy find projects
 cdr () {
@@ -161,4 +180,10 @@ cdr () {
   cdls ~/ROKT/$A_DIRECTORY
 }
 
+# =^^ ROKT Specifics ^^=
+
+# reverse search
+eval "$(atuin init zsh --disable-up-arrow)"
+
+# prompt
 eval "$(starship init zsh)"

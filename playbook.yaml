@@ -6,7 +6,8 @@
     - role: macos
       become: yes
       tags: macos
-    - homebrew
+    - role: homebrew
+      tags: homebrew
     - git
     - kitty
     - zsh

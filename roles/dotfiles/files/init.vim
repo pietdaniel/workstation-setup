@@ -88,6 +88,12 @@ map I yiw:Ack '<C-r>"'<cr>
 " go to next error
 nnoremap <Leader>] :lne<CR>
 
+" insert timestamp
+nnoremap <C-S-K> :let @r =strftime('- %c - ')<CR>:normal! "rp<CR>a
+inoremap <C-S-K> <ESC>:let @r = strftime('- %c - ')<CR>:normal! "rp<CR>a
+autocmd FileType markdown nnoremap <C-S-K> :let @r =strftime('# %c -')<CR>:normal! "rP<CR>li<CR><CR><CR><CR><ESC>kki
+autocmd FileType markdown inoremap <C-S-K> <ESC>:let @r = strftime('# %c -')<CR>:normal! "rP<CR>li<CR><CR><CR><CR><ESC>kki
+
 " == AUTOCMD ==
 
 " dont save these things as files

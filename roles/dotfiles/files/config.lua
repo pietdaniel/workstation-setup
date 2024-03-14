@@ -6,6 +6,7 @@ require('packer').startup(function(use)
   use 'sainnhe/gruvbox-material'
   use { "ellisonleao/gruvbox.nvim" }
   use { 'junegunn/fzf.vim', requires = 'junegunn/fzf' }
+  use "ntpeters/vim-better-whitespace"
 end)
 
 require("gruvbox").setup({
@@ -16,3 +17,5 @@ require("gruvbox").setup({
 
 vim.o.background = "dark"
 vim.cmd("colorscheme gruvbox")
+
+vim.api.nvim_set_keymap('n', '<Leader>w', ':StripWhitespace<CR>', {noremap = true, silent = true})

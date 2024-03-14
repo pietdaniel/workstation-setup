@@ -50,6 +50,7 @@
     - htop
     - tldr
     - just
+    - atuin
     # cloud utils
     - awscli
     - aws-vault

@@ -18,10 +18,24 @@
     state: directory
     mode: '0755'
 
+- name: Create Go bin directory
+  become: no
+  file:
+    path: "{{ ansible_env.HOME }}/go/bin"
+    state: directory
+    mode: '0755'
+
 - name: Create src directory for GitHub projects
   become: no
   file:
     path: "{{ ansible_env.HOME }}/go/src/github.com"
+    state: directory
+    mode: '0755'
+
+- name: Create src directory for my GitHub projects
+  become: no
+  file:
+    path: "{{ ansible_env.HOME }}/go/src/github.com/pietdaniel"
     state: directory
     mode: '0755'
 
