@@ -7,6 +7,10 @@ require('packer').startup(function(use)
   use { "ellisonleao/gruvbox.nvim" }
   use { 'junegunn/fzf.vim', requires = 'junegunn/fzf' }
   use "ntpeters/vim-better-whitespace"
+  use {
+    'nvim-telescope/telescope.nvim', tag = '0.1.6',
+    requires = { {'nvim-lua/plenary.nvim'} }
+  }
 end)
 
 require("gruvbox").setup({

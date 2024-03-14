@@ -66,10 +66,6 @@
 # Disable the default prompt order and modules you don't need
 # prompt_order = ["line_break", "directory", "git_branch", "git_state", "status", "character"]
 
-# Configure the line break to ensure the prompt appears on a new line
-# [line_break]
-# disabled = false
-
 # Customize the directory module
 # [directory]
 # truncation_length = 3
@@ -93,8 +89,7 @@
 # style = "bold red"
 # disabled = false  # Ensure the status module is enabled
 
-format = """
-$username\
+format = """↱ $username\
 $hostname\
 $directory\
 $git_branch\
@@ -109,9 +104,9 @@ $character"""
 style = "blue"
 
 [character]
-success_symbol = "[❯](purple)"
-error_symbol = "[❯](red)"
-vimcmd_symbol = "[❮](green)"
+success_symbol = "↳ [λ](green)"
+error_symbol = "↳ [λ](red)"
+vimcmd_symbol = "↳ [ʎ](yellow)"
 
 [git_branch]
 format = "[$branch]($style)"
