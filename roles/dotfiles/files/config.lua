@@ -123,10 +123,18 @@ require'nvim-treesitter.configs'.setup {
   },
 }
 
+
 --- project search
-vim.cmd [[
-command! -nargs=+ Ack lua require('telescope.builtin').grep_string({ search = vim.fn.escape(<q-args>, '\\') })
-]]
+function ProjectSearch(search_pattern)
+    local command = string.format(":silent! grep -iR '%s' .", vim.fn.escape(search_pattern, "'\\"))
+    vim.api.nvim_command(command)
+    vim.api.nvim_command("copen")
+end
+
+vim.cmd([[
+  command! -nargs=* Ack lua _G.ProjectSearch(<f-args>)
+]])
+
 vim.cmd [[cnoreabbrev ag Ack]]
 vim.cmd [[cnoreabbrev Ag Ack]]
 
