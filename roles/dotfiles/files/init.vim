@@ -132,3 +132,6 @@ nnoremap <leader>fh <cmd>Telescope help_tags<cr>
 
 " NERDTree
 let NERDTreeShowHidden=1
+
+" Easymotion
+map <Leader> <Plug>(easymotion-prefix)
