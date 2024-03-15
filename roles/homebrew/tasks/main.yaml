@@ -47,6 +47,7 @@
     - watch
     - fzf
     - the_silver_searcher
+    - ripgrep
     - htop
     - tldr
     - just
@@ -56,6 +57,7 @@
     - aws-vault
     # languages
     - go
+    - npm
 
 - name: Install Homebrew Cask packages
   homebrew:
