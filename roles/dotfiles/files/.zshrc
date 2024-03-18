@@ -142,6 +142,18 @@ alias v=nvim
 alias d=docker
 alias dc=docker-compose
 
+# K8s Aliases
+alias k=kubectl
+alias kx=kubectx
+alias kns=kubens
+alias kgp='kubectl get po'
+kxs() {
+    kx `kx | fzf --layout=reverse`
+}
+function kw() {
+  watch -n 1 "kubectl $@"
+}
+
 ## open a script or something
 function vw() {
   nvim "$(which $1)"
