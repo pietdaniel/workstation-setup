@@ -43,6 +43,12 @@ require('packer').startup(function(use)
   use 'easymotion/vim-easymotion'
   use 'NoahTheDuke/vim-just'
   use 'Raimondi/delimitMate'
+  use({
+    "iamcco/markdown-preview.nvim",
+    run = "cd app && npm install",
+    setup = function() vim.g.mkdp_filetypes = { "markdown" } end,
+    ft = { "markdown" },
+  })
 end)
 
 --- LSP Config
@@ -167,3 +173,6 @@ end
 
 vim.api.nvim_set_keymap('n', 'I', ':lua _G.search_word()<CR>', {noremap = true, silent = true})
 vim.api.nvim_set_keymap('v', 'I', ':<C-u>lua _G.search_selection()<CR>', {noremap = true, silent = true})
+
+--- MarkdownPreview
+vim.g.mkdp_theme = 'light'
