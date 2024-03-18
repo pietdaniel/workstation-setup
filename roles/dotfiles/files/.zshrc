@@ -20,9 +20,9 @@ plugins=(
     branch
     zsh-autosuggestions
     zsh-syntax-highlighting
-    zsh-completions
     zsh-interactive-cd
     zsh-navigation-tools
+    zsh-completions
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -138,6 +138,10 @@ alias urlencode='python -c "import sys, urllib.parse as ul; print(ul.quote_plus(
 # Vim aliases
 alias v=nvim
 
+# Docker Aliases
+alias d=docker
+alias dc=docker-compose
+
 ## open a script or something
 function vw() {
   nvim "$(which $1)"
@@ -182,8 +186,15 @@ cdr () {
 
 # =^^ ROKT Specifics ^^=
 
+# justfile completions
+eval "$(brew shellenv)"
+fpath=($HOMEBREW_PREFIX/share/zsh/site-functions $fpath)
+
 # reverse search
 eval "$(atuin init zsh --disable-up-arrow)"
 
 # prompt
 eval "$(starship init zsh)"
+
+# shift+tab to accept zshrc autocomplete suggestions
+bindkey '^[[Z' autosuggest-accept

@@ -52,12 +52,19 @@
     - tldr
     - just
     - atuin
+    - yq
     # cloud utils
     - awscli
     - aws-vault
     # languages
     - go
+    # build tools
+    - docker
+    - docker-compose
+    - yarn
     - npm
+    # databases
+    - postgresql
 
 - name: Install Homebrew Cask packages
   homebrew:

@@ -128,7 +128,7 @@ lua require('config')
 nnoremap <silent> <C-f> :Telescope find_files<CR>
 nnoremap <silent> <C-g> :Telescope live_grep<CR>
 nnoremap <silent> <S-t> :Telescope buffers<CR>
-nnoremap <leader>fh <cmd>Telescope help_tags<cr>
+" nnoremap <leader>fh <cmd>Telescope help_tags<cr>
 
 " NERDTree
 let NERDTreeShowHidden=1

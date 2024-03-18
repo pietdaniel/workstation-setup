@@ -41,6 +41,8 @@ require('packer').startup(function(use)
   }
 
   use 'easymotion/vim-easymotion'
+  use 'NoahTheDuke/vim-just'
+  use 'Raimondi/delimitMate'
 end)
 
 --- LSP Config
@@ -79,6 +81,10 @@ vim.cmd("colorscheme gruvbox")
 vim.api.nvim_set_keymap('n', '<Leader>w', ':StripWhitespace<CR>', {noremap = true, silent = true})
 
 --- telescope configs
+
+-- find files
+vim.api.nvim_set_keymap('n', '<Leader>fh', ':lua require"telescope.builtin".find_files({ hidden = true })<CR>', {noremap = true, silent = true})
+
 -- project search
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', function()
