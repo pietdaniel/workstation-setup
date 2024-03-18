@@ -135,7 +135,7 @@ alias cd='cdls'
 alias venv3='python3 -m venv ./venv && source ./venv/bin/activate'
 alias venv='virtualenv ./venv && source ./venv/bin/activate'
 alias senv='source ./venv/bin/activate'
-alias serve='python -m http.server'
+alias serve='python3 -m http.server'
 alias urldecode='python -c "import sys, urllib.parse as ul; print(ul.unquote_plus(sys.argv[1]))"'
 alias urlencode='python -c "import sys, urllib.parse as ul; print(ul.quote_plus(sys.argv[1]))"'
 
