@@ -14,6 +14,10 @@ export HOMEBREW_CASK_OPTS=--require-sha
 # oh-my-zsh
 export ZSH="$HOME/.oh-my-zsh"
 
+# justfile completions
+eval "$(brew shellenv)"
+fpath=($HOMEBREW_PREFIX/share/zsh/site-functions $fpath)
+
 plugins=(
     git
     aliases
@@ -198,9 +202,6 @@ cdr () {
 
 # =^^ ROKT Specifics ^^=
 
-# justfile completions
-eval "$(brew shellenv)"
-fpath=($HOMEBREW_PREFIX/share/zsh/site-functions $fpath)
 
 # reverse search
 eval "$(atuin init zsh --disable-up-arrow)"
