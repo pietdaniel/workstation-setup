@@ -53,6 +53,8 @@
     - just
     - atuin
     - yq
+    - gnugp
+    - pinentry-mac
     # cloud utils
     - awscli
     - aws-vault

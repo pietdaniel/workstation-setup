@@ -135,3 +135,8 @@ let NERDTreeShowHidden=1
 
 " Easymotion
 map <Leader> <Plug>(easymotion-prefix)
+
+" delimitMate
+let delimitMate_expand_cr=1
+autocmd FileType python let b:delimitMate_nesting_quotes = ['"']
+autocmd FileType markdown let b:delimitMate_nesting_quotes = ['`']
