@@ -49,6 +49,7 @@ require('packer').startup(function(use)
     setup = function() vim.g.mkdp_filetypes = { "markdown" } end,
     ft = { "markdown" },
   })
+  use 'ngalaiko/tree-sitter-go-template'
 end)
 
 --- LSP Config
@@ -73,6 +74,17 @@ require('mason-lspconfig').setup({
     lsp_zero.default_setup,
   },
 })
+
+--- Treesitter
+local parser_config = require'nvim-treesitter.parsers'.get_parser_configs()
+parser_config.gotmpl = {
+  install_info = {
+    url = "https://github.com/ngalaiko/tree-sitter-go-template",
+    files = {"src/parser.c"}
+  },
+  filetype = "gotmpl",
+  used_by = {"gohtmltmpl", "gotexttmpl", "gotmpl", "yaml"}
+}
 
 --- gruvbox
 require("gruvbox").setup({

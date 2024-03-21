@@ -31,6 +31,9 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
+# GPG TTY
+export GPG_TTY=$(tty)
+
 # git override, requires oh-my-zsh git plugin
 unalias gap
 gap () {
@@ -211,3 +214,4 @@ eval "$(starship init zsh)"
 
 # shift+tab to accept zshrc autocomplete suggestions
 bindkey '^[[Z' autosuggest-accept
+

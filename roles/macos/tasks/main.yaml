@@ -59,3 +59,9 @@
     state: directory
     mode: '0755'
     owner: "{{ ansible_user_id }}"
+
+- name: GPG pinentry-mac Use Keychain
+  become: no
+  command: >
+    defaults write org.gpgtools.pinentry-mac DisableKeychain -bool no
+
