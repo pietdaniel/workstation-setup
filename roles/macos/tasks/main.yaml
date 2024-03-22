@@ -64,4 +64,3 @@
   become: no
   command: >
     defaults write org.gpgtools.pinentry-mac DisableKeychain -bool no
-

@@ -50,6 +50,7 @@ require('packer').startup(function(use)
     ft = { "markdown" },
   })
   use 'ngalaiko/tree-sitter-go-template'
+  use 'github/copilot.vim'
 end)
 
 --- LSP Config

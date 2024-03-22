@@ -2,6 +2,9 @@
 export PATH="${PATH?}:/Users/piet/scripts"
 export PATH="${PATH?}:/Users/rokt/scripts"
 
+export PATH="${PATH?}:/Users/piet/scripts"
+export PATH="${PATH?}:/Users/rokt/work-scripts"
+
 # Go
 export GOPATH="${HOME?}/go"
 export GOROOT="$(go env GOROOT)"

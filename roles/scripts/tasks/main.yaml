@@ -5,3 +5,10 @@
     dest: "~/scripts"
     state: link
     force: yes
+
+- name: Create work-scripts folder
+  become: no
+  file:
+    path: "{{ ansible_env.HOME }}/work-scripts"
+    state: directory
+    mode: '0755'
