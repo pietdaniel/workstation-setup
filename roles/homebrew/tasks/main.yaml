@@ -55,6 +55,7 @@
     - yq
     - gnugp
     - pinentry-mac
+    - imagemagick
     # cloud utils
     - awscli
     - aws-vault

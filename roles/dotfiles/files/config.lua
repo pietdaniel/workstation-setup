@@ -51,7 +51,44 @@ require('packer').startup(function(use)
   })
   use 'ngalaiko/tree-sitter-go-template'
   use 'github/copilot.vim'
+
+
+  --- https://github.com/epwalsh/obsidian.nvim?tab=readme-ov-file#setup
+  use({
+    "epwalsh/obsidian.nvim",
+    tag = "*",
+    requires = {
+      'nvim-lua/plenary.nvim',
+      'nvim-telescope/telescope.nvim',
+      "nvim-treesitter/nvim-treesitter",
+      'hrsh7th/nvim-cmp',
+    },
+    config = function()
+      require("obsidian").setup({
+        workspaces = {
+          {
+            name = "main",
+            path = "~/Documents/Obsidian Vault",
+          },
+        },
+        -- Optional, completion of wiki links, local markdown links, and tags using nvim-cmp.
+        completion = {
+          -- Set to false to disable completion.
+          nvim_cmp = true,
+          -- Trigger completion at 2 chars.
+          min_chars = 2,
+        },
+      })
+    end,
+  })
 end)
+
+--- Obsidian Config
+vim.api.nvim_set_keymap('n', '<Leader><Leader>n', ':ObsidianDailies<CR>', { noremap = true, silent = true })
+-- not sure why it whines about this but it do
+vim.cmd([[
+  autocmd FileType markdown setlocal conceallevel=1
+]])
 
 --- LSP Config
 local lsp_zero = require('lsp-zero')
@@ -100,10 +137,8 @@ vim.cmd("colorscheme gruvbox")
 vim.api.nvim_set_keymap('n', '<Leader>w', ':StripWhitespace<CR>', {noremap = true, silent = true})
 
 --- telescope configs
-
 -- find files
 vim.api.nvim_set_keymap('n', '<Leader>fh', ':lua require"telescope.builtin".find_files({ hidden = true })<CR>', {noremap = true, silent = true})
-
 -- project search
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', function()
@@ -151,13 +186,13 @@ require'nvim-treesitter.configs'.setup {
 
 --- project search
 function ProjectSearch(search_pattern)
-    local command = string.format(":silent! grep -iR '%s' .", vim.fn.escape(search_pattern, "'\\"))
-    vim.api.nvim_command(command)
-    vim.api.nvim_command("copen")
+  local command = string.format(":silent! grep -iR '%s' .", vim.fn.escape(search_pattern, "'\\"))
+  vim.api.nvim_command(command)
+  vim.api.nvim_command("copen")
 end
 
 vim.cmd([[
-  command! -nargs=* Ack lua _G.ProjectSearch(<f-args>)
+command! -nargs=* Ack lua _G.ProjectSearch(<f-args>)
 ]])
 
 vim.cmd [[cnoreabbrev ag Ack]]

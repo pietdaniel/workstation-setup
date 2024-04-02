@@ -10,12 +10,18 @@ export GOPATH="${HOME?}/go"
 export GOROOT="$(go env GOROOT)"
 export PATH="$PATH:$HOME/go/bin:$HOME/bin"
 
+# ROKT Specifics
+export PATH="${PATH?}:$HOME/ROKT/my-rokt-jwt/bin"
+
 # Force certain more-secure behaviours from homebrew
 export HOMEBREW_NO_INSECURE_REDIRECT=1
 export HOMEBREW_CASK_OPTS=--require-sha
 
 # oh-my-zsh
 export ZSH="$HOME/.oh-my-zsh"
+
+# disable oh-my-zsh bother message
+export DISABLE_UPDATE_PROMPT=true
 
 # justfile completions
 eval "$(brew shellenv)"

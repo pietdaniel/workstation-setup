@@ -142,4 +142,4 @@ autocmd FileType python let b:delimitMate_nesting_quotes = ['"']
 autocmd FileType markdown let b:delimitMate_nesting_quotes = ['`']
 
 " Use gotmpl tresitter on handlebar files
-autocmd BufNewFile,BufRead * if search('{{.\+}}', 'nw') | setlocal filetype=gotmpl | endif
+" autocmd BufNewFile,BufRead * if search('{{.\+}}', 'nw') | setlocal filetype=gotmpl | endif
