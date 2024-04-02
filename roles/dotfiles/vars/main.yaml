@@ -23,3 +23,6 @@ dotfiles_configs:
   - package: kitty
     filename: "kitty.conf"
     path: "~/.config/kitty"
+  - package: atuin
+    filename: "config.toml"
+    path: "~/.config/atuin/"

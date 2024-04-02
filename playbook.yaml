@@ -2,7 +2,8 @@
   become: no
   roles:
     - scripts
-    - dotfiles
+    - role: dotfiles
+      tags: dotfiles
     - role: macos
       become: yes
       tags: macos
