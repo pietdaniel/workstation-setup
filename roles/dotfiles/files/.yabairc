@@ -15,3 +15,4 @@ yabai -m rule --add app="^Alfred Preferences$" manage=off
 yabai -m rule --add app="^Preview$" manage=off
 yabai -m rule --add app="^Spotify$" manage=off
 yabai -m rule --add app="^LICEcap$" manage=off
+yabai -m rule --add app="^Telegram$" manage=off

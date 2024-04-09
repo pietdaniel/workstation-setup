@@ -143,3 +143,17 @@ autocmd FileType markdown let b:delimitMate_nesting_quotes = ['`']
 
 " Use gotmpl tresitter on handlebar files
 " autocmd BufNewFile,BufRead * if search('{{.\+}}', 'nw') | setlocal filetype=gotmpl | endif
+
+" Define a function that updates the mapping
+function! SetDebugMapping()
+    if &filetype == 'python'
+        nnoremap <Leader><Leader>p koimport ipdb; ipdb.set_trace()<esc>
+    elseif &filetype == 'javascript'
+        nnoremap <Leader><Leader>p kodebugger;<esc>
+    elseif &filetype == 'typescript'
+        nnoremap <Leader><Leader>p kodebugger;<esc>
+    endif
+endfunction
+
+" Call the function whenever a buffer is entered
+autocmd BufEnter * call SetDebugMapping()
