@@ -84,7 +84,8 @@ require('packer').startup(function(use)
 end)
 
 --- Obsidian Config
-vim.api.nvim_set_keymap('n', '<Leader><Leader>n', ':ObsidianDailies<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<Leader>on', ':ObsidianDailies<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<Leader>os', ':ObsidianSearch<CR>', { noremap = true, silent = true })
 -- not sure why it whines about this but it do
 vim.cmd([[
   autocmd FileType markdown setlocal conceallevel=1
