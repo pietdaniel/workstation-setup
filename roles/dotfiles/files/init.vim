@@ -143,6 +143,7 @@ autocmd FileType markdown let b:delimitMate_nesting_quotes = ['`']
 
 " Use gotmpl tresitter on handlebar files
 " autocmd BufNewFile,BufRead * if search('{{.\+}}', 'nw') | setlocal filetype=gotmpl | endif
+autocmd BufRead,BufNewFile infra/kube/**/templates/* set syntax=gotmpl
 
 " Define a function that updates the mapping
 function! SetDebugMapping()

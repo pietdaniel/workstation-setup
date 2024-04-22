@@ -22,6 +22,7 @@ export ZSH="$HOME/.oh-my-zsh"
 
 # disable oh-my-zsh bother message
 export DISABLE_UPDATE_PROMPT=true
+export DISABLE_AUTO_UPDATE=true
 
 # justfile completions
 eval "$(brew shellenv)"
@@ -224,3 +225,5 @@ eval "$(starship init zsh)"
 # shift+tab to accept zshrc autocomplete suggestions
 bindkey '^[[Z' autosuggest-accept
 
+export JAVA_HOME=$(/usr/libexec/java_home)
+export PATH="$JAVA_HOME/bin:$PATH"

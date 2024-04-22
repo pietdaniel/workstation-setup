@@ -68,6 +68,7 @@
     - docker-compose
     - yarn
     - npm
+    - trunk-io
     # databases
     - postgresql
 
