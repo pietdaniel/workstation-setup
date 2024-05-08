@@ -17,6 +17,8 @@ require('packer').startup(function(use)
   use 'tpope/vim-fugitive'
   use {'neovim/nvim-lspconfig'}
 
+  use "lukas-reineke/lsp-format.nvim"
+
   use {
     "nvim-treesitter/nvim-treesitter",
     run = ':TSUpdate'
@@ -112,6 +114,18 @@ require('mason-lspconfig').setup({
   handlers = {
     lsp_zero.default_setup,
   },
+})
+
+--- LSP Format
+vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+    pattern = { "*.py" },
+    desc = "Auto-format Python files after saving",
+    callback = function()
+        local fileName = vim.api.nvim_buf_get_name(0)
+        vim.cmd(":silent !black --preview -q -l 120 " .. fileName)
+        vim.cmd(":silent !isort --profile black --float-to-top -q " .. fileName)
+    end,
+    group = autocmd_group,
 })
 
 --- Treesitter
