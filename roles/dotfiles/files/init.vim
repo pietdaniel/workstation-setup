@@ -55,9 +55,6 @@ vmap <leader>9 :s/\(.\{80\}.\{-}\s\)/\1\r/g<cr>:StripWhitespace<cr>
 " toggle paste in cmd only
 nnoremap <Leader>p :set invpaste<CR>
 
-" easy reallign
-nnoremap <Leader>= gg=G<C-o>
-
 " fast json format
 nnoremap <Leader>z :%!jq '.'<CR>
 

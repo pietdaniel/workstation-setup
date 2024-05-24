@@ -128,6 +128,16 @@ vim.api.nvim_create_autocmd({ "BufWritePost" }, {
     group = autocmd_group,
 })
 
+vim.api.nvim_create_autocmd("BufWritePre", {
+    pattern = { "*.js", "*.jsx", "*.ts", "*.tsx" },
+    desc = "Auto-format JavaScript and TypeScript files with LSP before saving",
+    callback = function()
+        vim.lsp.buf.format()
+    end,
+})
+
+vim.api.nvim_set_keymap('n', '<leader>=', '<cmd>lua vim.lsp.buf.format()<CR>', { noremap = true, silent = true })
+
 --- Treesitter
 local parser_config = require'nvim-treesitter.parsers'.get_parser_configs()
 parser_config.gotmpl = {
@@ -201,7 +211,7 @@ require'nvim-treesitter.configs'.setup {
 
 --- project search
 function ProjectSearch(search_pattern)
-  local command = string.format(":silent! grep -iR '%s' .", vim.fn.escape(search_pattern, "'\\"))
+  local command = string.format(":silent! grep -iR '%s' --exclude-dir=node_modules --exclude-dir=dist .", vim.fn.escape(search_pattern, "'\\"))
   vim.api.nvim_command(command)
   vim.api.nvim_command("copen")
 end

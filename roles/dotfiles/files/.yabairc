@@ -17,3 +17,4 @@ yabai -m rule --add app="^Spotify$" manage=off
 yabai -m rule --add app="^licecap$" manage=off
 yabai -m rule --add app="^Telegram$" manage=off
 yabai -m rule --add app="^Obsidian$" manage=off
+yabai -m rule --add app="^Sonos$" manage=off
