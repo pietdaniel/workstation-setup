@@ -13,6 +13,10 @@ export PATH="$PATH:$HOME/go/bin:$HOME/bin"
 # ROKT Specifics
 export PATH="${PATH?}:$HOME/ROKT/my-rokt-jwt/bin"
 
+# Spark
+export SPARK_HOME=/opt/homebrew/Cellar/apache-spark/3.5.1
+export PATH=$SPARK_HOME/bin:$PATH
+
 # Force certain more-secure behaviours from homebrew
 export HOMEBREW_NO_INSECURE_REDIRECT=1
 export HOMEBREW_CASK_OPTS=--require-sha
@@ -205,6 +209,14 @@ function notes() {
   fi
 }
 
+function md5() {
+  echo -n "$@" | md5sum | awk '{print $1}'
+}
+
+function sha256() {
+  echo -n "$@" | sha256sum | awk '{print $1}'
+}
+
 # =vv ROKT Specifics vv=
 
 # Quickly fuzzy find projects
@@ -225,5 +237,10 @@ eval "$(starship init zsh)"
 # shift+tab to accept zshrc autocomplete suggestions
 bindkey '^[[Z' autosuggest-accept
 
-export JAVA_HOME=$(/usr/libexec/java_home)
-export PATH="$JAVA_HOME/bin:$PATH"
+# Java
+export JAVA_HOME=$(/usr/libexec/java_home -v 11)
+export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
+
+export SPARK_HOME=/usr/local/spark
+export PATH=$SPARK_HOME/bin:$PATH
+

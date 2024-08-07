@@ -22,7 +22,7 @@ shift + ctrl + cmd - l : \
     yabai -m window --resize right:40:0 ; \
     yabai -m window --resize left:40:0
 
-shift + cmd - l : pmset displaysleepnow
+# shift + cmd - l : osascript -e 'tell application "System Events" to keystroke "q" using {control down, command down}'
 
 # Rotate windows clockwise and anticlockwise
 alt - r         : yabai -m space --rotate 90
