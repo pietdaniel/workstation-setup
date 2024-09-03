@@ -261,15 +261,20 @@ require'nvim-treesitter.configs'.setup {
 }
 
 
---- project search
 function ProjectSearch(search_pattern)
-  local command = string.format(":silent! grep -iR '%s' --exclude-dir=node_modules --exclude-dir=dist .", vim.fn.escape(search_pattern, "'\\"))
+  -- Escape special characters for grep and wrap the pattern in double quotes
+  local escaped_pattern = '"' .. vim.fn.escape(search_pattern, '"\\') .. '"'
+  -- Print the escaped pattern
+  print("Search Pattern: " .. escaped_pattern)
+  -- Create the command string
+  local command = string.format(":silent! grep -iR %s --exclude-dir=node_modules --exclude-dir=dist .", escaped_pattern)
+  -- Execute the command
   vim.api.nvim_command(command)
   vim.api.nvim_command("copen")
 end
 
 vim.cmd([[
-command! -nargs=* Ack lua _G.ProjectSearch(<f-args>)
+  command! -nargs=* Ack lua _G.ProjectSearch(<q-args>)
 ]])
 
 vim.cmd [[cnoreabbrev ag Ack]]
