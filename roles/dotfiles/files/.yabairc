@@ -19,4 +19,7 @@ yabai -m rule --add app="^Telegram$" manage=off
 yabai -m rule --add app="^Obsidian$" manage=off
 yabai -m rule --add app="^Sonos$" manage=off
 yabai -m rule --add app="^ChatGPT$" manage=off
+yabai -m rule --add app="^simulation-game$" manage=off
+yabai -m rule --add app="^main$" manage=off
+yabai -m rule --add app="^Finder$" manage=off
 yabai -m config focus_follows_mouse autoraise

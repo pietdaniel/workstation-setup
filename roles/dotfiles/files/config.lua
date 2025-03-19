@@ -140,10 +140,10 @@ end)
 --- Obsidian Config
 vim.api.nvim_set_keymap('n', '<Leader>on', ':ObsidianDailies<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<Leader>os', ':ObsidianSearch<CR>', { noremap = true, silent = true })
--- not sure why it whines about this but it do
-vim.cmd([[
-  autocmd FileType markdown setlocal conceallevel=1
-]])
+-- not sure why it whines about this but it does.
+-- vim.cmd([[
+--  autocmd FileType markdown setlocal conceallevel=1
+-- ]])
 
 --- LSP Config
 local lsp_zero = require('lsp-zero')
@@ -237,6 +237,8 @@ require('telescope').setup{
     },
   },
 }
+--- go to function definition with leader f
+vim.api.nvim_set_keymap('n', '<leader>f', ':lua require("telescope.builtin").lsp_document_symbols()<CR>zz', { noremap = true, silent = true })
 
 --- treesitter
 require'nvim-treesitter.configs'.setup {
@@ -261,6 +263,8 @@ require'nvim-treesitter.configs'.setup {
 }
 
 
+--- Project Search
+
 function ProjectSearch(search_pattern)
   -- Escape special characters for grep and wrap the pattern in double quotes
   local escaped_pattern = '"' .. vim.fn.escape(search_pattern, '"\\') .. '"'
@@ -279,6 +283,8 @@ vim.cmd([[
 
 vim.cmd [[cnoreabbrev ag Ack]]
 vim.cmd [[cnoreabbrev Ag Ack]]
+
+
 
 --- search word
 function _G.search_word()
