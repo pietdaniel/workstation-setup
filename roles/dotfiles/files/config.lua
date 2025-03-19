@@ -264,15 +264,26 @@ require'nvim-treesitter.configs'.setup {
 
 
 --- Project Search
-
 function ProjectSearch(search_pattern)
-  -- Escape special characters for grep and wrap the pattern in double quotes
-  local escaped_pattern = '"' .. vim.fn.escape(search_pattern, '"\\') .. '"'
-  -- Print the escaped pattern
-  print("Search Pattern: " .. escaped_pattern)
-  -- Create the command string
-  local command = string.format(":silent! grep -iR %s --exclude-dir=node_modules --exclude-dir=dist .", escaped_pattern)
-  -- Execute the command
+  local case_flag = "-i" -- Default to case-insensitive
+  local pattern = search_pattern
+
+  -- Check for quoted pattern (case-sensitive)
+  local first_char = pattern:sub(1,1)
+  local last_char = pattern:sub(-1)
+  if (first_char == '"' and last_char == '"') or (first_char == "'" and last_char == "'") then
+    case_flag = "" -- Case-sensitive
+    pattern = pattern:sub(2, -2) -- Strip quotes
+  end
+
+  -- Escape special characters
+  pattern = vim.fn.shellescape(pattern)
+
+  -- Exclude node_modules and dist directories
+  local exclude_args = "--glob='!node_modules/**' --glob='!dist/**'"
+
+  -- Construct and run the ripgrep command
+  local command = string.format(":silent! grep! %s --vimgrep --no-heading %s %s .", case_flag, exclude_args, pattern)
   vim.api.nvim_command(command)
   vim.api.nvim_command("copen")
 end
@@ -283,8 +294,6 @@ vim.cmd([[
 
 vim.cmd [[cnoreabbrev ag Ack]]
 vim.cmd [[cnoreabbrev Ag Ack]]
-
-
 
 --- search word
 function _G.search_word()
