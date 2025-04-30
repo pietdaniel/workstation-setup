@@ -7,7 +7,8 @@ export PATH="${PATH?}:/Users/rokt/work-scripts"
 
 # Go
 export GOPATH="${HOME?}/go"
-export GOROOT="$(go env GOROOT)"
+# this is frozen to a version
+export GOROOT="/opt/homebrew/Cellar/go/1.24.2/libexec"
 export PATH="$PATH:$HOME/go/bin:$HOME/bin"
 
 # ROKT Specifics
