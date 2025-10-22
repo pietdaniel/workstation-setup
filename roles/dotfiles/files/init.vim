@@ -140,6 +140,7 @@ autocmd FileType markdown let b:delimitMate_nesting_quotes = ['`']
 
 " Use gotmpl tresitter on handlebar files
 autocmd BufNewFile,BufRead *.yml,*.yaml if (search('{{.\+}}', 'nw') && (expand('%:p') =~ 'kube')) | setlocal filetype=gotmpl | endif
+autocmd BufNewFile,BufRead *.yml,*.yaml if (search('{{.\+}}', 'nw') && (expand('%:p') =~ 'helm')) | setlocal filetype=helm | endif
 
 " Define a function that updates the mapping
 function! SetDebugMapping()
