@@ -42,3 +42,9 @@
     type: rsa
     size: 2048
     force: no
+
+- name: Set pager to delta
+  git_config:
+    name: core.pager
+    value: delta
+    scope: global

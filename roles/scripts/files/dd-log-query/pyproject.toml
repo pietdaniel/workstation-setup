@@ -1,0 +1,12 @@
+[project]
+name = "dd-log-query"
+version = "0.1.0"
+description = "Query Datadog logs from the command line"
+requires-python = ">=3.8"
+dependencies = [
+    "datadog-api-client>=2.28.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+dd-log-query = "dd_log_query:main"
