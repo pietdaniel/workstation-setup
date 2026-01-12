@@ -145,28 +145,47 @@ vim.api.nvim_set_keymap('n', '<Leader>os', ':ObsidianSearch<CR>', { noremap = tr
 --  autocmd FileType markdown setlocal conceallevel=1
 -- ]])
 
---- LSP Config
-local lsp_zero = require('lsp-zero')
+local lsp_zero = require("lsp-zero")
+local lspconfig = require("lspconfig")
+local util = require("lspconfig.util")
 
 lsp_zero.on_attach(function(client, bufnr)
-  -- see :help lsp-zero-keybindings
-  -- to learn the available actions
-  lsp_zero.default_keymaps({buffer = bufnr})
+  lsp_zero.default_keymaps({ buffer = bufnr })
 end)
 
--- to learn how to use mason.nvim with lsp-zero
--- read this: https://github.com/VonHeikemen/lsp-zero.nvim/blob/v3.x/doc/md/guide/integrate-with-mason-nvim.md
-require('mason').setup({})
-require('mason-lspconfig').setup({
+lsp_zero.extend_lspconfig()
+
+require("mason").setup({})
+
+require("mason-lspconfig").setup({
   ensure_installed = {
-    "pyright",
+    "ty",
     "eslint",
-    "tsserver",
+    "ts_ls",
+    "lua_ls",
+    "gopls",
   },
   handlers = {
     lsp_zero.default_setup,
   },
 })
+
+vim.lsp.config('ty', {
+  root_dir = vim.fs.root(0, {
+    "pyproject.toml",
+    "uv.lock",
+    ".git",
+  }),
+
+  settings = {
+    ty = {
+      -- ty language server settings go here
+    }
+  }
+})
+
+-- Required: Enable the language server
+vim.lsp.enable('ty')
 
 --- LSP Format
 vim.api.nvim_create_autocmd({ "BufWritePost" }, {
@@ -321,3 +340,5 @@ vim.api.nvim_set_keymap('v', 'I', ':<C-u>lua _G.search_selection()<CR>', {norema
 
 --- MarkdownPreview
 vim.g.mkdp_theme = 'light'
+
+

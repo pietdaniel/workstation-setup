@@ -23,4 +23,4 @@ yabai -m rule --add app="^simulation-game$" manage=off
 yabai -m rule --add app="^main$" manage=off
 yabai -m rule --add app="^Finder$" manage=off
 yabai -m rule --add app="^1Password$" manage=off
-yabai -m config focus_follows_mouse autoraise
+yabai -m config focus_follows_mouse off
