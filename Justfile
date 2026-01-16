@@ -5,3 +5,7 @@ update-alfred-prefs:
 
 run-tag tag:
   ansible-playbook -vvv -i localhost, playbook.yaml --connection=local --tags={{tag}}
+
+setup:
+  pip install pre-commit
+  pre-commit install
