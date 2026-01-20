@@ -131,7 +131,7 @@ nnoremap <silent> <S-t> :Telescope buffers<CR>
 let NERDTreeShowHidden=1
 
 " Easymotion
-map <Leader> <Plug>(easymotion-prefix)
+" map <Leader> <Plug>(easymotion-prefix)
 
 " delimitMate
 let delimitMate_expand_cr=1

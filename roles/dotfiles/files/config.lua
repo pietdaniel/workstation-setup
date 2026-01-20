@@ -42,7 +42,18 @@ require('packer').startup(function(use)
     }
   }
 
-  use 'easymotion/vim-easymotion'
+  -- use 'easymotion/vim-easymotion'
+  use({
+    "easymotion/vim-easymotion",
+    config = function()
+      -- Set leader as the EasyMotion prefix, old-school but it works
+      vim.keymap.set({ "n", "x", "o" }, "<Leader>", "<Plug>(easymotion-prefix)", {
+        remap = true,
+        silent = true,
+      })
+    end,
+  })
+
   use 'NoahTheDuke/vim-just'
   use 'Raimondi/delimitMate'
   use({
@@ -53,6 +64,17 @@ require('packer').startup(function(use)
   })
   use 'ngalaiko/tree-sitter-go-template'
   use 'github/copilot.vim'
+
+  use({
+    "folke/trouble.nvim",
+    cmd = { "Trouble" },
+    requires = {
+      'nvim-telescope/telescope.nvim',
+    },
+    config = function()
+      require("trouble").setup({})
+    end,
+  })
 
   -- implement trouble
   --[[
@@ -232,14 +254,26 @@ vim.cmd("colorscheme gruvbox")
 --- whitespace
 vim.api.nvim_set_keymap('n', '<Leader>w', ':StripWhitespace<CR>', {noremap = true, silent = true})
 
---- telescope configs
+-- === Telescope Configs ===
+
 -- find files
-vim.api.nvim_set_keymap('n', '<Leader>fh', ':lua require"telescope.builtin".find_files({ hidden = true })<CR>', {noremap = true, silent = true})
+vim.api.nvim_set_keymap(
+  'n', '<Leader>fh', ':lua require"telescope.builtin".find_files({ hidden = true })<CR>',
+  {noremap = true, silent = true}
+)
+
 -- project search
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', function()
   builtin.grep_string({ search = vim.fn.input("Grep > ") });
 end)
+
+vim.keymap.set("n", "<C-l>", function()
+  require("telescope.builtin").diagnostics({
+    bufnr = 0, -- current buffer; remove for workspace
+  })
+end, { noremap = true, silent = true })
+
 -- fuck arrow keys
 local actions = require('telescope.actions')
 require('telescope').setup{
@@ -256,8 +290,12 @@ require('telescope').setup{
     },
   },
 }
+
 --- go to function definition with leader f
-vim.api.nvim_set_keymap('n', '<leader>f', ':lua require("telescope.builtin").lsp_document_symbols()<CR>zz', { noremap = true, silent = true })
+vim.api.nvim_set_keymap(
+  'n', '<leader>f', ':lua require("telescope.builtin").lsp_document_symbols()<CR>zz',
+  { noremap = true, silent = true }
+)
 
 --- treesitter
 require'nvim-treesitter.configs'.setup {
@@ -341,4 +379,23 @@ vim.api.nvim_set_keymap('v', 'I', ':<C-u>lua _G.search_selection()<CR>', {norema
 --- MarkdownPreview
 vim.g.mkdp_theme = 'light'
 
+-- Trouble config -- idk, do I care about these?
+vim.keymap.set("n", "<leader>xx", function()
+  vim.cmd("Trouble diagnostics toggle")
+end, { silent = true, noremap = true, desc = "Diagnostics (Trouble)" })
 
+vim.keymap.set("n", "<leader>xX", function()
+  vim.cmd("Trouble diagnostics toggle filter.buf=0")
+end, { silent = true, noremap = true, desc = "Buffer Diagnostics (Trouble)" })
+
+vim.keymap.set("n", "<leader>cl", function()
+  vim.cmd("Trouble lsp toggle focus=false win.position=right")
+end, { silent = true, noremap = true, desc = "LSP (Trouble)" })
+
+vim.keymap.set("n", "<leader>xL", function()
+  vim.cmd("Trouble loclist toggle")
+end, { silent = true, noremap = true, desc = "Location List (Trouble)" })
+
+vim.keymap.set("n", "<leader>xQ", function()
+  vim.cmd("Trouble qflist toggle")
+end, { silent = true, noremap = true, desc = "Quickfix List (Trouble)" })
