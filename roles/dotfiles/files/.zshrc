@@ -5,10 +5,13 @@ export PATH="${PATH?}:/Users/rokt/scripts"
 export PATH="${PATH?}:/Users/piet/scripts"
 export PATH="${PATH?}:/Users/rokt/work-scripts"
 
+## for rdba
+# export PATH="${PATH?}:/Users/rokt/hacks/rdba/mssql-cli/mssql-cli"
+
 # Go
 export GOPATH="${HOME?}/go"
 # this is frozen to a version
-export GOROOT="/opt/homebrew/Cellar/go/1.24.2/libexec"
+export GOROOT="/opt/homebrew/Cellar/go/1.25.5/libexec"
 export PATH="$PATH:$HOME/go/bin:$HOME/bin"
 
 # ROKT Specifics
@@ -32,6 +35,12 @@ export DISABLE_AUTO_UPDATE=true
 # justfile completions
 eval "$(brew shellenv)"
 fpath=($HOMEBREW_PREFIX/share/zsh/site-functions $fpath)
+
+# Load workstation secrets if present
+SECRETS_ENV="$HOME/.config/personal/secrets.env"
+if [[ -r "$SECRETS_ENV" ]]; then
+  source "$SECRETS_ENV"
+fi
 
 plugins=(
     git
@@ -228,7 +237,6 @@ cdr () {
 
 # =^^ ROKT Specifics ^^=
 
-
 # reverse search
 eval "$(atuin init zsh --disable-up-arrow)"
 
@@ -244,3 +252,27 @@ export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
 
 export SPARK_HOME=/usr/local/spark
 export PATH=$SPARK_HOME/bin:$PATH
+
+# Claude code
+export CLAUDE_CODE_USE_BEDROCK=1
+export AWS_REGION=us-west-2
+alias rokt-ai="aws-vault exec rokt-ai --"
+
+# Add tq to path
+export PATH="${PATH?}:$HOME/go/src/github.com/pietdaniel/tq/bin"
+alias cdtq="cd $HOME/go/src/github.com/pietdaniel/tq"
+
+# amp
+export PATH="$HOME/.local/bin:$PATH"
+
+alias oc=opencode
+export PATH="/Users/rokt/.local/state/fnm_multishells/28571_1766081896034/bin":$PATH
+export FNM_MULTISHELL_PATH="/Users/rokt/.local/state/fnm_multishells/28571_1766081896034"
+export FNM_VERSION_FILE_STRATEGY="local"
+export FNM_DIR="/Users/rokt/.local/share/fnm"
+export FNM_LOGLEVEL="info"
+export FNM_NODE_DIST_MIRROR="https://nodejs.org/dist"
+export FNM_COREPACK_ENABLED="false"
+export FNM_RESOLVE_ENGINES="true"
+export FNM_ARCH="arm64"
+rehash
