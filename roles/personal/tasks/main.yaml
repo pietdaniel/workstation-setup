@@ -1,0 +1,20 @@
+---
+- name: Ensure ~/.config directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config"
+    state: directory
+    mode: '0755'
+
+- name: Ensure ~/.config/personal directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config/personal"
+    state: directory
+    mode: '0755'
+
+- name: Ensure secrets.env file exists
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config/personal/secrets.env"
+    state: touch
+    mode: '0600'
+    modification_time: preserve
+    access_time: preserve
