@@ -336,8 +336,8 @@ function ProjectSearch(search_pattern)
   -- Escape special characters
   pattern = vim.fn.shellescape(pattern)
 
-  -- Exclude node_modules and dist directories
-  local exclude_args = "--glob='!node_modules/**' --glob='!dist/**'"
+  -- Exclude node_modules, git, and dist directories
+  local exclude_args = "--glob='!node_modules/**' --glob='!dist/**' --glob='!.git/**'"
 
   -- Construct and run the ripgrep command
   local command = string.format(":silent! grep! %s --vimgrep --no-heading %s %s .", case_flag, exclude_args, pattern)
