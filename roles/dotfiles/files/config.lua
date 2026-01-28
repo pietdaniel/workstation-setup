@@ -256,7 +256,12 @@ vim.api.nvim_set_keymap('n', '<Leader>w', ':StripWhitespace<CR>', {noremap = tru
 
 -- === Telescope Configs ===
 local builtin = require('telescope.builtin')
-vim.keymap.set('n', '<C-f>', builtin.find_files, { noremap = true, silent = true })
+vim.keymap.set('n', '<C-f>', function()
+  builtin.find_files({
+    hidden = true,
+    file_ignore_patterns = { "^%.git/" },
+  })
+end, { noremap = true, silent = true })
 vim.keymap.set('n', '<C-g>', builtin.live_grep, { noremap = true, silent = true })
 vim.keymap.set('n', '<S-t>', builtin.buffers, { noremap = true, silent = true })
 -- vim.keymap.set('n', '<leader>fh', builtin.help_tags, { noremap = true, silent = true })
