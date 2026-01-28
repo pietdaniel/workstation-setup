@@ -255,6 +255,11 @@ vim.cmd("colorscheme gruvbox")
 vim.api.nvim_set_keymap('n', '<Leader>w', ':StripWhitespace<CR>', {noremap = true, silent = true})
 
 -- === Telescope Configs ===
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', '<C-f>', builtin.find_files, { noremap = true, silent = true })
+vim.keymap.set('n', '<C-g>', builtin.live_grep, { noremap = true, silent = true })
+vim.keymap.set('n', '<S-t>', builtin.buffers, { noremap = true, silent = true })
+-- vim.keymap.set('n', '<leader>fh', builtin.help_tags, { noremap = true, silent = true })
 
 -- find files
 vim.api.nvim_set_keymap(
