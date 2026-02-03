@@ -1,45 +1,87 @@
-# Path
-export PATH="${PATH?}:/Users/piet/scripts"
-export PATH="${PATH?}:/Users/rokt/scripts"
+# ===========================================
+# Cross-platform .zshrc with OS conditionals
+# ===========================================
 
-export PATH="${PATH?}:/Users/piet/scripts"
-export PATH="${PATH?}:/Users/rokt/work-scripts"
+# Detect OS
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    IS_MACOS=true
+    IS_LINUX=false
+else
+    IS_MACOS=false
+    IS_LINUX=true
+fi
 
-## for rdba
-# export PATH="${PATH?}:/Users/rokt/hacks/rdba/mssql-cli/mssql-cli"
+# ===========================================
+# PATH Configuration
+# ===========================================
 
-# Go
-export GOPATH="${HOME?}/go"
-# this is frozen to a version
-export GOROOT="/opt/homebrew/Cellar/go/1.25.5/libexec"
+# Cross-platform paths
+export PATH="$PATH:$HOME/scripts"
+export PATH="$PATH:$HOME/work-scripts"
 export PATH="$PATH:$HOME/go/bin:$HOME/bin"
+export PATH="$HOME/.local/bin:$PATH"
 
-# ROKT Specifics
-export PATH="${PATH?}:$HOME/ROKT/my-rokt-jwt/bin"
+# macOS-specific paths
+if [[ "$IS_MACOS" == true ]]; then
+    # Homebrew shell environment
+    eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# Spark
-export SPARK_HOME=/opt/homebrew/Cellar/apache-spark/3.5.1
-export PATH=$SPARK_HOME/bin:$PATH
+    # Homebrew security settings
+    export HOMEBREW_NO_INSECURE_REDIRECT=1
+    export HOMEBREW_CASK_OPTS=--require-sha
 
-# Force certain more-secure behaviours from homebrew
-export HOMEBREW_NO_INSECURE_REDIRECT=1
-export HOMEBREW_CASK_OPTS=--require-sha
+    # justfile completions (requires Homebrew)
+    fpath=($HOMEBREW_PREFIX/share/zsh/site-functions $fpath)
+fi
 
-# oh-my-zsh
+# ===========================================
+# Go Configuration
+# ===========================================
+export GOPATH="$HOME/go"
+
+if [[ "$IS_MACOS" == true ]]; then
+    # Homebrew-installed Go
+    export GOROOT="/opt/homebrew/Cellar/go/1.25.5/libexec"
+elif [[ "$IS_LINUX" == true ]]; then
+    # System Go on Linux
+    export GOROOT="/usr/lib/golang"
+fi
+
+# ===========================================
+# Java Configuration
+# ===========================================
+if [[ "$IS_MACOS" == true ]]; then
+    export JAVA_HOME=$(/usr/libexec/java_home -v 11 2>/dev/null)
+    export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
+elif [[ "$IS_LINUX" == true ]]; then
+    # Amazon Linux / RHEL Java path
+    if [[ -d "/usr/lib/jvm/java-11" ]]; then
+        export JAVA_HOME="/usr/lib/jvm/java-11"
+        export PATH="$JAVA_HOME/bin:$PATH"
+    fi
+fi
+
+# ===========================================
+# Spark Configuration (macOS only for now)
+# ===========================================
+if [[ "$IS_MACOS" == true ]]; then
+    export SPARK_HOME=/opt/homebrew/Cellar/apache-spark/3.5.1
+    export PATH=$SPARK_HOME/bin:$PATH
+fi
+
+# ===========================================
+# Oh-My-Zsh Configuration
+# ===========================================
 export ZSH="$HOME/.oh-my-zsh"
 
-# disable oh-my-zsh bother message
+# Disable oh-my-zsh update prompts
 export DISABLE_UPDATE_PROMPT=true
 export DISABLE_AUTO_UPDATE=true
-
-# justfile completions
-eval "$(brew shellenv)"
-fpath=($HOMEBREW_PREFIX/share/zsh/site-functions $fpath)
 
 # Load workstation secrets if present
 SECRETS_ENV="$HOME/.config/personal/secrets.env"
 if [[ -r "$SECRETS_ENV" ]]; then
-  source "$SECRETS_ENV"
+    source "$SECRETS_ENV"
 fi
 
 plugins=(
@@ -55,16 +97,22 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
-# GPG TTY
+# ===========================================
+# GPG Configuration
+# ===========================================
 export GPG_TTY=$(tty)
 
+# ===========================================
+# Git Functions and Aliases
+# ===========================================
+
 # git override, requires oh-my-zsh git plugin
-unalias gap
+unalias gap 2>/dev/null
 gap () {
     if [ "$(git_current_branch)" = "master" ]; then
-      echo "You sure you want to do this on master"
+        echo "You sure you want to do this on master"
     else
-      git add -A && git commit -n -m $1 && git push origin $(git_current_branch)
+        git add -A && git commit -n -m $1 && git push origin $(git_current_branch)
     fi
 }
 
@@ -77,15 +125,15 @@ function gitsearch() {
 }
 
 function git-master-branch-name() {
-  VERBOSE_NAME=`git symbolic-ref refs/remotes/origin/HEAD`
-  echo $VERBOSE_NAME | sed -e 's/refs\/remotes\/origin\///'
+    VERBOSE_NAME=`git symbolic-ref refs/remotes/origin/HEAD`
+    echo $VERBOSE_NAME | sed -e 's/refs\/remotes\/origin\///'
 }
 
 # The above function fails sometimes, this script fixes it
 alias fixmaster="git symbolic-ref refs/remotes/origin/HEAD refs/remotes/origin/master"
 
 function gcom() {
-  git checkout `git-master-branch-name`
+    git checkout `git-master-branch-name`
 }
 
 # Git aliases
@@ -96,41 +144,51 @@ alias gacmsg='git add -A && git commit -m'
 alias gcop='git checkout prod'
 alias gpod='git pull origin prod'
 alias gpom='git pull origin master'
-alias gdc='git diff --cached'
 alias gsc="git --no-pager shortlog -s -n"
-alias gpod='git pull origin prod'
-alias gpom='git pull origin master'
-alias gdc='git diff --cached'
 
-# easy extraction of various file types
+# ===========================================
+# Utility Functions
+# ===========================================
+
+# Easy extraction of various file types
 extract () {
-  if [ -f $1 ] ; then
-    case $1 in
-      *.tar.bz2)   tar xvjf $1    ;;
-      *.tar.gz)    tar xvzf $1    ;;
-      *.bz2)       bunzip2 $1     ;;
-      *.rar)       unrar x $1     ;;
-      *.gz)        gunzip $1      ;;
-      *.tar)       tar xvf $1     ;;
-      *.tbz2)      tar xvjf $1    ;;
-      *.tgz)       tar xvzf $1    ;;
-      *.zip)       unzip $1       ;;
-      *.Z)         uncompress $1  ;;
-      *.7z)        7z x $1        ;;
-      *)           echo "don't know how to extract '$1'..." ;;
-    esac
-  else
-    echo "'$1' is not valid for extraction"
-  fi
+    if [ -f $1 ] ; then
+        case $1 in
+            *.tar.bz2)   tar xvjf $1    ;;
+            *.tar.gz)    tar xvzf $1    ;;
+            *.bz2)       bunzip2 $1     ;;
+            *.rar)       unrar x $1     ;;
+            *.gz)        gunzip $1      ;;
+            *.tar)       tar xvf $1     ;;
+            *.tbz2)      tar xvjf $1    ;;
+            *.tgz)       tar xvzf $1    ;;
+            *.zip)       unzip $1       ;;
+            *.Z)         uncompress $1  ;;
+            *.7z)        7z x $1        ;;
+            *)           echo "don't know how to extract '$1'..." ;;
+        esac
+    else
+        echo "'$1' is not valid for extraction"
+    fi
 }
 
-# the one, the only
+function md5() {
+    echo -n "$@" | md5sum | awk '{print $1}'
+}
+
+function sha256() {
+    echo -n "$@" | sha256sum | awk '{print $1}'
+}
+
+# ===========================================
+# Editor Configuration
+# ===========================================
 export EDITOR=nvim
 
-# set up vim
+# Set up vim mode
 bindkey -v
 
-# goodies for vim mode
+# Goodies for vim mode
 bindkey '^P' up-history
 bindkey '^N' down-history
 bindkey '^?' backward-delete-char
@@ -138,18 +196,22 @@ bindkey '^h' backward-delete-char
 bindkey '^w' backward-kill-word
 bindkey '^r' history-incremental-search-backward
 
-# default .4 seconds ... but why
+# Default .4 seconds ... but why
 export KEYTIMEOUT=0
 
-# fancy less
+# ===========================================
+# Terminal Configuration
+# ===========================================
+
+# Fancy less
 export LESS='-R'
 export LESSOPEN='|~/.lessfilter %s'
 
-# fancy ls
+# Fancy ls
 export LSCOLORS='exfxcxdxbxegedabagacad'
 alias ls='ls --color=auto'
 
-# disable zsh correct
+# Disable zsh correct
 unsetopt correct_all
 
 # Fancy CD
@@ -158,7 +220,9 @@ cdls () {
 }
 alias cd='cdls'
 
-# Python aliases
+# ===========================================
+# Python Aliases
+# ===========================================
 alias venv3='python3 -m venv ./venv && source ./venv/bin/activate'
 alias venv='virtualenv ./venv && source ./venv/bin/activate'
 alias senv='source ./venv/bin/activate'
@@ -166,14 +230,18 @@ alias serve='python3 -m http.server'
 alias urldecode='python -c "import sys, urllib.parse as ul; print(ul.unquote_plus(sys.argv[1]))"'
 alias urlencode='python -c "import sys, urllib.parse as ul; print(ul.quote_plus(sys.argv[1]))"'
 
-# Vim aliases
+# ===========================================
+# Tool Aliases
+# ===========================================
+
+# Vim
 alias v=nvim
 
-# Docker Aliases
+# Docker
 alias d=docker
 alias dc=docker-compose
 
-# K8s Aliases
+# Kubernetes
 alias k=kubectl
 alias kx=kubectx
 alias kns=kubens
@@ -182,97 +250,88 @@ kxs() {
     kx `kx | fzf --layout=reverse`
 }
 function kw() {
-  watch -n 1 "kubectl $@"
+    watch -n 1 "kubectl $@"
 }
 
-## open a script or something
-function vw() {
-  nvim "$(which $1)"
-}
-
-## opens a new tmp txt buf
-function tmpTxtBuf() {
-  __fname=`date +%s%3N-tmp-txt-buf`
-  echo "Opening $__fname"
-  nvim /tmp/$__fname
-}
-
-alias b=tmpTxtBuf
-
-# Tmux aliases
+# Tmux
 alias ta="tmux attach"
 
-# just aliases
+# Just
 alias j=just
 
-# opens my notes
+# ===========================================
+# Custom Functions
+# ===========================================
+
+# Open a script or something
+function vw() {
+    nvim "$(which $1)"
+}
+
+# Opens a new tmp txt buf
+function tmpTxtBuf() {
+    __fname=`date +%s%3N-tmp-txt-buf`
+    echo "Opening $__fname"
+    nvim /tmp/$__fname
+}
+alias b=tmpTxtBuf
+
+# Opens notes
 function notes() {
-  SWAPPATH="/Users/piet/.vim/swapfiles/notes.txt.swp"
-  if [ "$1" = "-f" ]; then
-    nvim ~/notes.txt
-  else
-    if [ ! -f "$SWAPPATH"  ]; then
-      nvim ~/notes.txt
+    SWAPPATH="$HOME/.vim/swapfiles/notes.txt.swp"
+    if [ "$1" = "-f" ]; then
+        nvim ~/notes.txt
     else
-      echo "Swap Exists"
+        if [ ! -f "$SWAPPATH" ]; then
+            nvim ~/notes.txt
+        else
+            echo "Swap Exists"
+        fi
     fi
-  fi
 }
 
-function md5() {
-  echo -n "$@" | md5sum | awk '{print $1}'
-}
-
-function sha256() {
-  echo -n "$@" | sha256sum | awk '{print $1}'
-}
-
-# =vv ROKT Specifics vv=
+# ===========================================
+# ROKT Specifics
+# ===========================================
+export PATH="$PATH:$HOME/ROKT/my-rokt-jwt/bin"
 
 # Quickly fuzzy find projects
 cdr () {
-  A_DIRECTORY=`ls ~/ROKT | fzf`
-  cdls ~/ROKT/$A_DIRECTORY
+    A_DIRECTORY=`ls ~/ROKT | fzf`
+    cdls ~/ROKT/$A_DIRECTORY
 }
 
-# =^^ ROKT Specifics ^^=
-
-# reverse search
-eval "$(atuin init zsh --disable-up-arrow)"
-
-# prompt
-eval "$(starship init zsh)"
-
-# shift+tab to accept zshrc autocomplete suggestions
-bindkey '^[[Z' autosuggest-accept
-
-# Java
-export JAVA_HOME=$(/usr/libexec/java_home -v 11)
-export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
-
-export SPARK_HOME=/usr/local/spark
-export PATH=$SPARK_HOME/bin:$PATH
-
-# Claude code
+# Claude/AI configuration
 export CLAUDE_CODE_USE_BEDROCK=1
 export AWS_REGION=us-west-2
 alias rokt-ai="aws-vault exec rokt-ai --"
 
-# Add tq to path
-export PATH="${PATH?}:$HOME/go/src/github.com/pietdaniel/tq/bin"
+# Custom project paths
+export PATH="$PATH:$HOME/go/src/github.com/pietdaniel/tq/bin"
 alias cdtq="cd $HOME/go/src/github.com/pietdaniel/tq"
 
-# amp
-export PATH="$HOME/.local/bin:$PATH"
-
 alias oc=opencode
-export PATH="/Users/rokt/.local/state/fnm_multishells/28571_1766081896034/bin":$PATH
-export FNM_MULTISHELL_PATH="/Users/rokt/.local/state/fnm_multishells/28571_1766081896034"
-export FNM_VERSION_FILE_STRATEGY="local"
-export FNM_DIR="/Users/rokt/.local/share/fnm"
-export FNM_LOGLEVEL="info"
-export FNM_NODE_DIST_MIRROR="https://nodejs.org/dist"
-export FNM_COREPACK_ENABLED="false"
-export FNM_RESOLVE_ENGINES="true"
-export FNM_ARCH="arm64"
-rehash
+
+# ===========================================
+# Shell Integrations (load last)
+# ===========================================
+
+# Atuin (reverse search)
+if command -v atuin &>/dev/null; then
+    eval "$(atuin init zsh --disable-up-arrow)"
+fi
+
+# Starship (prompt)
+if command -v starship &>/dev/null; then
+    eval "$(starship init zsh)"
+fi
+
+# Shift+tab to accept zsh autocomplete suggestions
+bindkey '^[[Z' autosuggest-accept
+
+# ===========================================
+# FNM (Fast Node Manager) - macOS only
+# ===========================================
+if [[ "$IS_MACOS" == true ]] && command -v fnm &>/dev/null; then
+    eval "$(fnm env --use-on-cd)"
+fi
