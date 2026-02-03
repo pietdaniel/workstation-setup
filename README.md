@@ -1,6 +1,10 @@
 Workstation Setup
 ===
 
+This project is my workstation setup using Ansible. It includes configurations for
+dotfiles, applications, and system settings to streamline the setup process on a
+new machine.
+
 # Wiki
 
 ## How to update .zshrc
