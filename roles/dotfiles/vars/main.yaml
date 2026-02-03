@@ -1,28 +1,3 @@
-dotfiles_configs:
-  - package: tmux
-    filename: ".tmux.conf"
-    path: "~"
-  - package: zsh
-    filename: ".zshrc"
-    path: "~"
-  - package: starship
-    filename: "starship.toml"
-    path: "~/.config"
-  - package: vim
-    filename: "init.vim"
-    path: "~/.config/nvim"
-  - package: vim
-    filename: "config.lua"
-    path: "~/.config/nvim/lua"
-  - package: yabai
-    filename: ".yabairc"
-    path: "~"
-  - package: skhd
-    filename: ".skhdrc"
-    path: "~"
-  - package: kitty
-    filename: "kitty.conf"
-    path: "~/.config/kitty"
-  - package: atuin
-    filename: "config.toml"
-    path: "~/.config/atuin/"
+dotfiles:
+  - src: "kitty.conf"
+    dest: "{{ ansible_env.HOME }}/.config/kitty/kitty.conf"

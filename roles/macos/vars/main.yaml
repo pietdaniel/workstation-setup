@@ -1,0 +1,5 @@
+dotfiles:
+  - src: ".yabairc"
+    dest: "{{ ansible_env.HOME }}/.yabairc"
+  - src: ".skhdrc"
+    dest: "{{ ansible_env.HOME }}/.skhdrc"

@@ -1,66 +1,41 @@
 ---
-- name: Set keyboard preferences
-  command: >
+# macOS-specific system settings, window manager, and hotkeys
+
+# Install yabai, skhd, and pinentry-mac
+- name: Add koekeishiya tap (yabai/skhd)
+  community.general.homebrew_tap:
+    name: koekeishiya/formulae
+    state: present
+
+- name: Install yabai, skhd, and pinentry-mac
+  community.general.homebrew:
+    name:
+      - koekeishiya/formulae/yabai
+      - koekeishiya/formulae/skhd
+      - pinentry-mac
+    state: present
+
+# Symlink dotfiles
+- name: Symlink macos dotfiles
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/symlink_dotfiles.yaml"
+
+# System settings
+- name: Set keyboard preferences (Caps Lock <-> Escape swap)
+  ansible.builtin.command: >
     hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x700000039,"HIDKeyboardModifierMappingDst":0x700000029},{"HIDKeyboardModifierMappingSrc":0x700000029,"HIDKeyboardModifierMappingDst":0x700000039}]}'
+  changed_when: false
 
-- name: Dock Left
+- name: Configure Dock (left, autohide, small icons)
   become: no
-  command: >
-    sh -c "defaults write com.apple.dock orientation -string left;
-    defaults write com.apple.dock autohide -bool true;
-    defaults write com.apple.dock tilesize -int 16;
-    killall Dock"
-
-- name: Create Go workspace directory
-  become: no
-  file:
-    path: "{{ ansible_env.HOME }}/go"
-    state: directory
-    mode: '0755'
-
-- name: Create Go bin directory
-  become: no
-  file:
-    path: "{{ ansible_env.HOME }}/go/bin"
-    state: directory
-    mode: '0755'
-
-- name: Create src directory for GitHub projects
-  become: no
-  file:
-    path: "{{ ansible_env.HOME }}/go/src/github.com"
-    state: directory
-    mode: '0755'
-
-- name: Create src directory for my GitHub projects
-  become: no
-  file:
-    path: "{{ ansible_env.HOME }}/go/src/github.com/pietdaniel"
-    state: directory
-    mode: '0755'
-
-- name: Create hacks folder
-  become: no
-  file:
-    path: "{{ ansible_env.HOME }}/hacks"
-    state: directory
-    mode: '0755'
-
-- name: Create opt folder
-  file:
-    path: "/usr/local/opt/"
-    state: directory
-    mode: '0755'
-    owner: "{{ ansible_user_id }}"
-
-- name: Create new-day-counter folder for new-day script
-  file:
-    path: "/usr/local/opt/new-day-counter"
-    state: directory
-    mode: '0755'
-    owner: "{{ ansible_user_id }}"
+  ansible.builtin.shell: |
+    defaults write com.apple.dock orientation -string left
+    defaults write com.apple.dock autohide -bool true
+    defaults write com.apple.dock tilesize -int 16
+    killall Dock
+  changed_when: false
 
 - name: GPG pinentry-mac Use Keychain
   become: no
-  command: >
+  ansible.builtin.command: >
     defaults write org.gpgtools.pinentry-mac DisableKeychain -bool no
+  changed_when: false

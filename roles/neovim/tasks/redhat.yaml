@@ -1,0 +1,9 @@
+---
+# Install neovim via AppImage (Linux)
+
+- name: Install neovim (AppImage)
+  become: yes
+  ansible.builtin.get_url:
+    url: https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+    dest: /usr/local/bin/nvim
+    mode: '0755'

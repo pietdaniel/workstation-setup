@@ -1,0 +1,88 @@
+---
+# Amazon Linux / Fedora package installation via DNF
+# Note: Shell packages (zsh, tmux, starship, atuin) are handled by the 'shell' role
+# Note: kubectl/kubectx/kubens are handled by the 'k8s' role
+
+- name: Install EPEL repository (for additional packages)
+  become: yes
+  ansible.builtin.dnf:
+    name: epel-release
+    state: present
+  ignore_errors: yes  # Not all systems have epel-release available
+
+- name: Install packages via DNF
+  become: yes
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    # system utils
+    - git
+    - wget
+    - gnupg2
+    - util-linux
+    # workflow utils
+    - jq
+    - tree
+    - procps-ng  # includes 'watch'
+    - fzf
+    - the_silver_searcher
+    - ripgrep
+    - htop
+    - ImageMagick
+    # cloud utils
+    - awscli
+    # languages
+    - golang
+    # build tools
+    - docker
+    - npm
+    # databases
+    - postgresql15-server
+
+# Packages not in DNF repos - install via alternative methods
+
+- name: Install delta (git diff viewer)
+  become: yes
+  ansible.builtin.shell: |
+    DELTA_VERSION=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+    curl -sL "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu.tar.gz" | tar xz -C /tmp
+    mv /tmp/delta-*/delta /usr/local/bin/
+  args:
+    creates: /usr/local/bin/delta
+
+- name: Install yq
+  become: yes
+  ansible.builtin.get_url:
+    url: https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+    dest: /usr/local/bin/yq
+    mode: '0755'
+
+- name: Install just
+  become: yes
+  ansible.builtin.shell: |
+    curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
+  args:
+    creates: /usr/local/bin/just
+
+- name: Install tldr
+  ansible.builtin.shell: |
+    pip3 install --user tldr
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/tldr"
+
+- name: Enable and start Docker
+  become: yes
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    enabled: yes
+  ignore_errors: yes
+
+- name: Add user to docker group
+  become: yes
+  ansible.builtin.user:
+    name: "{{ ansible_user_id }}"
+    groups: docker
+    append: yes
+  ignore_errors: yes

@@ -1,0 +1,9 @@
+---
+# macOS Kubernetes tools via Homebrew
+
+- name: Install kubectl, kubectx, kubens via Homebrew
+  community.general.homebrew:
+    name:
+      - kubectl
+      - kubectx
+    state: present
