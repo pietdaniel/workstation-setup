@@ -1,22 +1,61 @@
 #!/bin/bash
+set -e
 
-# Install Homebrew if not installed
-if ! command -v brew > /dev/null; then
-    echo "Homebrew is not installed. Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    (echo; echo 'eval $(/opt/homebrew/bin/brew shellenv)') >> $HOME/.zprofile
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
+# Detect OS
+detect_os() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "darwin"
+    elif [[ -f /etc/os-release ]]; then
+        . /etc/os-release
+        if [[ "$ID" == "amzn" ]]; then
+            echo "amazon"
+        elif [[ "$ID_LIKE" == *"fedora"* ]] || [[ "$ID" == "fedora" ]]; then
+            echo "fedora"
+        else
+            echo "unsupported"
+        fi
+    else
+        echo "unsupported"
+    fi
+}
 
-# Check if Ansible is installed
-if ! command -v ansible > /dev/null; then
-    echo "Ansible is not installed. Installing Ansible..."
-    # Install Ansible using Homebrew
-    brew install ansible
-fi
+OS=$(detect_os)
+echo "Detected OS: $OS"
 
-# Verify Ansible installation
-if command -v ansible > /dev/null; then
+# Install dependencies based on OS
+case "$OS" in
+    darwin)
+        # Install Homebrew if not installed
+        if ! command -v brew &>/dev/null; then
+            echo "Homebrew is not installed. Installing Homebrew..."
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            (echo; echo 'eval $(/opt/homebrew/bin/brew shellenv)') >> "$HOME/.zprofile"
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+        fi
+
+        # Install Ansible via Homebrew
+        if ! command -v ansible &>/dev/null; then
+            echo "Installing Ansible via Homebrew..."
+            brew install ansible
+        fi
+        ;;
+
+    amazon|fedora)
+        # Install Ansible via dnf
+        if ! command -v ansible &>/dev/null; then
+            echo "Installing Ansible via dnf..."
+            sudo dnf install -y ansible
+        fi
+        ;;
+
+    *)
+        echo "Unsupported operating system. Exiting..."
+        exit 1
+        ;;
+esac
+
+# Verify Ansible installation and run playbook
+if command -v ansible &>/dev/null; then
     echo "Ansible is installed. Running the playbook..."
     ansible-playbook -vvv -i localhost, playbook.yaml --connection=local
 else
@@ -24,6 +63,10 @@ else
     exit 1
 fi
 
-echo "If this is the first time be sure to run"
-echo "yabai --start-service"
-echo "skhd --start-service"
+# Post-install instructions (macOS only)
+if [[ "$OS" == "darwin" ]]; then
+    echo ""
+    echo "If this is the first time be sure to run:"
+    echo "  yabai --start-service"
+    echo "  skhd --start-service"
+fi
