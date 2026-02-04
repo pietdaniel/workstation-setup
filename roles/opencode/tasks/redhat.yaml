@@ -1,0 +1,21 @@
+---
+# RedHat/Amazon Linux opencode installation
+
+- name: Install opencode
+  ansible.builtin.shell: |
+    curl -fsSL https://opencode.ai/install | bash
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/opencode"
+
+- name: Ensure opencode config directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config/opencode"
+    state: directory
+    mode: '0755'
+
+- name: Symlink opencode.json config
+  ansible.builtin.file:
+    src: "{{ playbook_dir }}/roles/dotfiles/files/opencode.json"
+    dest: "{{ ansible_env.HOME }}/.config/opencode/opencode.json"
+    state: link
+    force: yes

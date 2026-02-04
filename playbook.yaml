@@ -18,3 +18,5 @@
     - git
     - shell
     - neovim
+    - role: opencode
+      tags: opencode

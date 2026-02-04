@@ -1,0 +1,9 @@
+---
+# Dispatcher: include OS-specific opencode installation
+- name: Include Darwin (macOS) opencode tasks
+  ansible.builtin.include_tasks: darwin.yaml
+  when: ansible_os_family == "Darwin"
+
+- name: Include RedHat (Amazon Linux/Fedora) opencode tasks
+  ansible.builtin.include_tasks: redhat.yaml
+  when: ansible_os_family == "RedHat"
