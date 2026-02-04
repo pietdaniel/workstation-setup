@@ -28,7 +28,6 @@
     - tldr
     - just
     - yq
-    - gnupg
     - imagemagick
     - delta
     # cloud utils
