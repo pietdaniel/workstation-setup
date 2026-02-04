@@ -40,8 +40,19 @@ case "$OS" in
         fi
         ;;
 
-    amazon|fedora)
-        # Install Ansible via dnf
+    amazon)
+        # Install Ansible via pip on Amazon Linux
+        if ! command -v ansible &>/dev/null; then
+            echo "Installing pip and Ansible on Amazon Linux..."
+            sudo dnf install -y python3-pip
+            pip3 install --user ansible
+            # Add local bin to PATH for this session
+            export PATH="$HOME/.local/bin:$PATH"
+        fi
+        ;;
+
+    fedora)
+        # Install Ansible via dnf on Fedora
         if ! command -v ansible &>/dev/null; then
             echo "Installing Ansible via dnf..."
             sudo dnf install -y ansible
