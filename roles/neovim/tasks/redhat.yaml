@@ -1,12 +1,11 @@
 ---
 # Install neovim from tarball (Linux)
 
-- name: Download neovim tarball
+- name: Download and extract neovim
   become: yes
-  ansible.builtin.unarchive:
-    src: https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
-    dest: /opt
-    remote_src: yes
+  ansible.builtin.shell: |
+    curl -sL https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz | tar xz -C /opt
+  args:
     creates: /opt/nvim-linux64
 
 - name: Symlink nvim to /usr/local/bin
