@@ -97,99 +97,15 @@
   when: ag_clone.changed or not ansible_check_mode
 
 # ===========================================
-# Configure /usr/local/lib64 in linker path
-# Required for libraries built from source on 64-bit RHEL systems
+# ttyd (web-based terminal) - using static binary
 # ===========================================
 
-- name: Add /usr/local/lib64 to linker configuration
+- name: Install ttyd static binary
   become: yes
-  ansible.builtin.copy:
-    dest: /etc/ld.so.conf.d/usr-local.conf
-    content: |
-      /usr/local/lib64
-      /usr/local/lib
-    mode: '0644'
-  register: linker_config
-
-- name: Update linker cache
-  become: yes
-  ansible.builtin.command: ldconfig
-  when: linker_config.changed
-
-# ===========================================
-# libwebsockets and ttyd (web-based terminal)
-# ===========================================
-
-- name: Unshallow libwebsockets repo if needed
-  become: yes
-  ansible.builtin.shell: |
-    cd /opt/libwebsockets
-    if git rev-parse --is-shallow-repository | grep -q true; then
-      git fetch --unshallow --tags
-    else
-      git fetch --tags
-    fi
-  args:
-    chdir: /opt/libwebsockets
-  when: ansible_check_mode == false
-  ignore_errors: yes
-
-- name: Clone libwebsockets repo (v4.3.x for ttyd compatibility)
-  become: yes
-  ansible.builtin.git:
-    repo: https://github.com/warmcat/libwebsockets.git
-    dest: /opt/libwebsockets
-    version: v4.3.7
-    force: yes
-  register: libwebsockets_clone
-
-- name: Build and install libwebsockets
-  become: yes
-  ansible.builtin.shell: |
-    cd /opt/libwebsockets
-    rm -rf build
-    mkdir -p build
-    cd build
-    cmake .. \
-      -DLWS_WITH_LIBUV=ON \
-      -DLWS_WITHOUT_TESTAPPS=ON \
-      -DLWS_WITHOUT_TEST_SERVER=ON \
-      -DLWS_WITHOUT_TEST_PING=ON \
-      -DLWS_WITHOUT_TEST_CLIENT=ON
-    make -j$(nproc)
-    make install
-  args:
-    creates: /usr/local/lib64/libwebsockets.so
-  when: libwebsockets_clone.changed or not ansible_check_mode
-  register: libwebsockets_build
-
-- name: Update linker cache after libwebsockets install
-  become: yes
-  ansible.builtin.command: ldconfig
-  when: libwebsockets_build.changed
-
-- name: Clone ttyd repo
-  become: yes
-  ansible.builtin.git:
-    repo: https://github.com/tsl0922/ttyd.git
-    dest: /opt/ttyd
-    version: "1.7.7"
-    force: yes
-  register: ttyd_clone
-
-- name: Build and install ttyd
-  become: yes
-  ansible.builtin.shell: |
-    cd /opt/ttyd
-    rm -rf build
-    mkdir -p build
-    cd build
-    cmake ..
-    make -j$(nproc)
-    make install
-  args:
-    creates: /usr/local/bin/ttyd
-  when: (ttyd_clone.changed or libwebsockets_build.changed) or not ansible_check_mode
+  ansible.builtin.get_url:
+    url: https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64
+    dest: /usr/local/bin/ttyd
+    mode: '0755'
 
 - name: Install delta (git diff viewer)
   become: yes
