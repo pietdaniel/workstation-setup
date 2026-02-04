@@ -96,6 +96,30 @@
     creates: /usr/local/bin/ag
   when: ag_clone.changed or not ansible_check_mode
 
+# ===========================================
+# Configure /usr/local/lib64 in linker path
+# Required for libraries built from source on 64-bit RHEL systems
+# ===========================================
+
+- name: Add /usr/local/lib64 to linker configuration
+  become: yes
+  ansible.builtin.copy:
+    dest: /etc/ld.so.conf.d/usr-local.conf
+    content: |
+      /usr/local/lib64
+      /usr/local/lib
+    mode: '0644'
+  register: linker_config
+
+- name: Update linker cache
+  become: yes
+  ansible.builtin.command: ldconfig
+  when: linker_config.changed
+
+# ===========================================
+# libwebsockets and ttyd (web-based terminal)
+# ===========================================
+
 - name: Clone libwebsockets repo
   become: yes
   ansible.builtin.git:
@@ -113,10 +137,15 @@
     cmake ..
     make
     make install
-    ldconfig
   args:
-    creates: /usr/local/lib/libwebsockets.so
+    creates: /usr/local/lib64/libwebsockets.so
   when: libwebsockets_clone.changed or not ansible_check_mode
+  register: libwebsockets_build
+
+- name: Update linker cache after libwebsockets install
+  become: yes
+  ansible.builtin.command: ldconfig
+  when: libwebsockets_build.changed
 
 - name: Clone ttyd repo
   become: yes
