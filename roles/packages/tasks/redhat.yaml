@@ -3,13 +3,6 @@
 # Note: Shell packages (zsh, tmux, starship, atuin) are handled by the 'shell' role
 # Note: kubectl/kubectx/kubens are handled by the 'k8s' role
 
-- name: Install EPEL repository (for additional packages)
-  become: yes
-  ansible.builtin.dnf:
-    name: epel-release
-    state: present
-  ignore_errors: yes  # Not all systems have epel-release available
-
 - name: Install packages via DNF
   become: yes
   ansible.builtin.dnf:
@@ -21,15 +14,14 @@
     - wget
     - gnupg2
     - util-linux
+    - tar
+    - gzip
+    - unzip
     # workflow utils
     - jq
     - tree
     - procps-ng  # includes 'watch'
-    - fzf
-    - the_silver_searcher
-    - ripgrep
     - htop
-    - ImageMagick
     # cloud utils
     - awscli
     # languages
@@ -40,14 +32,71 @@
     # databases
     - postgresql15-server
 
-# Packages not in DNF repos - install via alternative methods
+# ===========================================
+# Packages not in Amazon Linux repos
+# Install via GitHub releases or other methods
+# ===========================================
+
+- name: Install fzf
+  ansible.builtin.git:
+    repo: https://github.com/junegunn/fzf.git
+    dest: "{{ ansible_env.HOME }}/.fzf"
+    depth: 1
+  register: fzf_clone
+
+- name: Run fzf install script
+  ansible.builtin.shell: |
+    ~/.fzf/install --all --no-bash --no-fish
+  args:
+    creates: "{{ ansible_env.HOME }}/.fzf/bin/fzf"
+  when: fzf_clone.changed or not ansible_check_mode
+
+- name: Install ripgrep
+  become: yes
+  ansible.builtin.shell: |
+    RG_VERSION=$(curl -s https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+    curl -sL "https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}/ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl.tar.gz" | tar xz -C /tmp
+    mv /tmp/ripgrep-*/rg /usr/local/bin/
+    rm -rf /tmp/ripgrep-*
+  args:
+    creates: /usr/local/bin/rg
+
+- name: Install the_silver_searcher (ag) from source
+  become: yes
+  ansible.builtin.dnf:
+    name:
+      - automake
+      - pkg-config
+      - pcre-devel
+      - xz-devel
+      - zlib-devel
+    state: present
+
+- name: Clone the_silver_searcher repo
+  become: yes
+  ansible.builtin.git:
+    repo: https://github.com/ggreer/the_silver_searcher.git
+    dest: /opt/the_silver_searcher
+    depth: 1
+  register: ag_clone
+
+- name: Build and install the_silver_searcher
+  become: yes
+  ansible.builtin.shell: |
+    cd /opt/the_silver_searcher
+    ./build.sh
+    make install
+  args:
+    creates: /usr/local/bin/ag
+  when: ag_clone.changed or not ansible_check_mode
 
 - name: Install delta (git diff viewer)
   become: yes
   ansible.builtin.shell: |
     DELTA_VERSION=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
-    curl -sL "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/delta-${DELTA_VERSION}-x86_64-unknown-linux-gnu.tar.gz" | tar xz -C /tmp
+    curl -sL "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/delta-${DELTA_VERSION}-x86_64-unknown-linux-musl.tar.gz" | tar xz -C /tmp
     mv /tmp/delta-*/delta /usr/local/bin/
+    rm -rf /tmp/delta-*
   args:
     creates: /usr/local/bin/delta
 
