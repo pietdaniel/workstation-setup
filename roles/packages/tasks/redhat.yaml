@@ -120,22 +120,29 @@
 # libwebsockets and ttyd (web-based terminal)
 # ===========================================
 
-- name: Clone libwebsockets repo
+- name: Clone libwebsockets repo (v4.3-stable for ttyd compatibility)
   become: yes
   ansible.builtin.git:
     repo: https://github.com/warmcat/libwebsockets.git
     dest: /opt/libwebsockets
-    depth: 1
+    version: v4.3-stable
+    force: yes
   register: libwebsockets_clone
 
 - name: Build and install libwebsockets
   become: yes
   ansible.builtin.shell: |
     cd /opt/libwebsockets
+    rm -rf build
     mkdir -p build
     cd build
-    cmake ..
-    make
+    cmake .. \
+      -DLWS_WITH_LIBUV=ON \
+      -DLWS_WITHOUT_TESTAPPS=ON \
+      -DLWS_WITHOUT_TEST_SERVER=ON \
+      -DLWS_WITHOUT_TEST_PING=ON \
+      -DLWS_WITHOUT_TEST_CLIENT=ON
+    make -j$(nproc)
     make install
   args:
     creates: /usr/local/lib64/libwebsockets.so
@@ -152,21 +159,23 @@
   ansible.builtin.git:
     repo: https://github.com/tsl0922/ttyd.git
     dest: /opt/ttyd
-    depth: 1
+    version: "1.7.7"
+    force: yes
   register: ttyd_clone
 
 - name: Build and install ttyd
   become: yes
   ansible.builtin.shell: |
     cd /opt/ttyd
+    rm -rf build
     mkdir -p build
     cd build
     cmake ..
-    make
+    make -j$(nproc)
     make install
   args:
     creates: /usr/local/bin/ttyd
-  when: ttyd_clone.changed or not ansible_check_mode
+  when: (ttyd_clone.changed or libwebsockets_build.changed) or not ansible_check_mode
 
 - name: Install delta (git diff viewer)
   become: yes
