@@ -3,11 +3,13 @@
 
 # Install yabai, skhd, and pinentry-mac
 - name: Add koekeishiya tap (yabai/skhd)
+  become: no
   community.general.homebrew_tap:
     name: koekeishiya/formulae
     state: present
 
 - name: Install yabai, skhd, and pinentry-mac
+  become: no
   community.general.homebrew:
     name:
       - koekeishiya/formulae/yabai
