@@ -5,11 +5,6 @@
 # Note: yabai/skhd/pinentry-mac are handled by the 'macos' role
 # Note: kubectl/kubectx/kubens are handled by the 'k8s' role
 
-- name: Add cask-fonts tap
-  community.general.homebrew_tap:
-    name: homebrew/cask-fonts
-    state: present
-
 - name: Install Homebrew packages
   community.general.homebrew:
     name: "{{ item }}"
