@@ -96,6 +96,49 @@
     creates: /usr/local/bin/ag
   when: ag_clone.changed or not ansible_check_mode
 
+- name: Clone libwebsockets repo
+  become: yes
+  ansible.builtin.git:
+    repo: https://github.com/warmcat/libwebsockets.git
+    dest: /opt/libwebsockets
+    depth: 1
+  register: libwebsockets_clone
+
+- name: Build and install libwebsockets
+  become: yes
+  ansible.builtin.shell: |
+    cd /opt/libwebsockets
+    mkdir -p build
+    cd build
+    cmake ..
+    make
+    make install
+    ldconfig
+  args:
+    creates: /usr/local/lib/libwebsockets.so
+  when: libwebsockets_clone.changed or not ansible_check_mode
+
+- name: Clone ttyd repo
+  become: yes
+  ansible.builtin.git:
+    repo: https://github.com/tsl0922/ttyd.git
+    dest: /opt/ttyd
+    depth: 1
+  register: ttyd_clone
+
+- name: Build and install ttyd
+  become: yes
+  ansible.builtin.shell: |
+    cd /opt/ttyd
+    mkdir -p build
+    cd build
+    cmake ..
+    make
+    make install
+  args:
+    creates: /usr/local/bin/ttyd
+  when: ttyd_clone.changed or not ansible_check_mode
+
 - name: Install delta (git diff viewer)
   become: yes
   ansible.builtin.shell: |
