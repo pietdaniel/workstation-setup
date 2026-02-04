@@ -1,0 +1,30 @@
+---
+# RedHat/Amazon Linux Kubernetes tools
+
+- name: Install kubectl
+  become: yes
+  ansible.builtin.shell: |
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    chmod +x kubectl
+    mv kubectl /usr/local/bin/
+  args:
+    creates: /usr/local/bin/kubectl
+
+- name: Install kubectx and kubens
+  become: yes
+  ansible.builtin.git:
+    repo: https://github.com/ahmetb/kubectx
+    dest: /opt/kubectx
+    depth: 1
+  register: kubectx_clone
+
+- name: Symlink kubectx and kubens
+  become: yes
+  ansible.builtin.file:
+    src: "/opt/kubectx/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    state: link
+  with_items:
+    - kubectx
+    - kubens
+  when: kubectx_clone.changed or not ansible_check_mode

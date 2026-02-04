@@ -1,0 +1,25 @@
+---
+# macOS opencode installation via Homebrew
+
+- name: Add opencode tap
+  community.general.homebrew_tap:
+    name: anomalyco/tap
+    state: present
+
+- name: Install opencode via Homebrew
+  community.general.homebrew:
+    name: opencode
+    state: present
+
+- name: Ensure opencode config directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config/opencode"
+    state: directory
+    mode: '0755'
+
+- name: Symlink opencode.json config
+  ansible.builtin.file:
+    src: "{{ playbook_dir }}/roles/dotfiles/files/opencode.json"
+    dest: "{{ ansible_env.HOME }}/.config/opencode/opencode.json"
+    state: link
+    force: yes

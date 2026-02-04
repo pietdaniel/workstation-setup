@@ -1,0 +1,9 @@
+dotfiles:
+  - src: ".zshrc"
+    dest: "{{ ansible_env.HOME }}/.zshrc"
+  - src: ".tmux.conf"
+    dest: "{{ ansible_env.HOME }}/.tmux.conf"
+  - src: "starship.toml"
+    dest: "{{ ansible_env.HOME }}/.config/starship.toml"
+  - src: "atuin.toml"
+    dest: "{{ ansible_env.HOME }}/.config/atuin/config.toml"

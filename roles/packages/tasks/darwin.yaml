@@ -1,0 +1,54 @@
+---
+# macOS package installation via Homebrew
+# Note: Homebrew install/update is handled by the 'homebrew' role
+# Note: Shell packages (zsh, tmux, starship, atuin) are handled by the 'shell' role
+# Note: yabai/skhd/pinentry-mac are handled by the 'macos' role
+# Note: kubectl/kubectx/kubens are handled by the 'k8s' role
+
+- name: Install Homebrew packages
+  community.general.homebrew:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    # system utils
+    - git
+    - wget
+    - gpg
+    - coreutils
+    # fonts
+    - font-monaspace
+    # workflow utils
+    - jq
+    - tree
+    - watch
+    - fzf
+    - the_silver_searcher
+    - ripgrep
+    - htop
+    - tldr
+    - just
+    - yq
+    - imagemagick
+    - delta
+    # cloud utils
+    - awscli
+    - aws-vault
+    # github
+    - gh
+    # languages
+    - go
+    # build tools
+    - docker
+    - docker-compose
+    - yarn
+    - npm
+    - trunk-io
+    # databases
+    - postgresql
+
+- name: Install Homebrew Cask packages
+  community.general.homebrew_cask:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - alfred

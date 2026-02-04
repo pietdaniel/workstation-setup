@@ -1,6 +1,8 @@
 - hosts: all
   become: no
   roles:
+    - role: homebrew
+      when: ansible_os_family == "Darwin"
     - personal
     - scripts
     - role: dotfiles
@@ -8,9 +10,13 @@
     - role: macos
       become: yes
       tags: macos
-    - role: homebrew
-      tags: homebrew
+      when: ansible_os_family == "Darwin"
+    - role: packages
+      tags: packages
+    - role: k8s
+      tags: k8s
     - git
-    - kitty
-    - zsh
-    - nvim
+    - shell
+    - neovim
+    - role: opencode
+      tags: opencode

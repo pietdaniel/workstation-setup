@@ -1,0 +1,11 @@
+---
+# macOS shell package installation via Homebrew
+
+- name: Install shell packages via Homebrew
+  community.general.homebrew:
+    name:
+      - zsh
+      - tmux
+      - starship
+      - atuin
+    state: present

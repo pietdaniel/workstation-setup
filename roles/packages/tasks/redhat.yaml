@@ -1,0 +1,177 @@
+---
+# Amazon Linux / Fedora package installation via DNF
+# Note: Shell packages (zsh, tmux, starship, atuin) are handled by the 'shell' role
+# Note: kubectl/kubectx/kubens are handled by the 'k8s' role
+
+- name: Install packages via DNF
+  become: yes
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    # system utils
+    - git
+    - wget
+    - util-linux
+    - tar
+    - gzip
+    - unzip
+    # workflow utils
+    - jq
+    - tree
+    - procps-ng  # includes 'watch'
+    - htop
+    # cloud utils
+    - awscli
+    # languages
+    - golang
+    # build tools
+    - cmake
+    - docker
+    - gcc
+    - gcc-c++
+    - json-c-devel
+    - libuv-devel
+    - make
+    - npm
+    - openssl-devel
+    # databases
+    - postgresql15-server
+
+# ===========================================
+# Packages not in Amazon Linux repos
+# Install via GitHub releases or other methods
+# ===========================================
+
+- name: Install fzf
+  ansible.builtin.git:
+    repo: https://github.com/junegunn/fzf.git
+    dest: "{{ ansible_env.HOME }}/.fzf"
+    depth: 1
+  register: fzf_clone
+
+- name: Run fzf install script
+  ansible.builtin.shell: |
+    ~/.fzf/install --all --no-bash --no-fish
+  args:
+    creates: "{{ ansible_env.HOME }}/.fzf/bin/fzf"
+  when: fzf_clone.changed or not ansible_check_mode
+
+- name: Install ripgrep
+  become: yes
+  ansible.builtin.shell: |
+    RG_VERSION=$(curl -s https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+    curl -sL "https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}/ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl.tar.gz" | tar xz -C /tmp
+    mv /tmp/ripgrep-*/rg /usr/local/bin/
+    rm -rf /tmp/ripgrep-*
+  args:
+    creates: /usr/local/bin/rg
+
+- name: Install the_silver_searcher (ag) from source
+  become: yes
+  ansible.builtin.dnf:
+    name:
+      - automake
+      - pkg-config
+      - pcre-devel
+      - xz-devel
+      - zlib-devel
+    state: present
+
+- name: Clone the_silver_searcher repo
+  become: yes
+  ansible.builtin.git:
+    repo: https://github.com/ggreer/the_silver_searcher.git
+    dest: /opt/the_silver_searcher
+    depth: 1
+  register: ag_clone
+
+- name: Build and install the_silver_searcher
+  become: yes
+  ansible.builtin.shell: |
+    cd /opt/the_silver_searcher
+    ./build.sh
+    make install
+  args:
+    creates: /usr/local/bin/ag
+  when: ag_clone.changed or not ansible_check_mode
+
+# ===========================================
+# ttyd (web-based terminal) - using static binary
+# ===========================================
+
+- name: Install ttyd static binary
+  become: yes
+  ansible.builtin.get_url:
+    url: https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64
+    dest: /usr/local/bin/ttyd
+    mode: '0755'
+    timeout: 30
+  retries: 3
+  delay: 5
+
+- name: Install delta (git diff viewer)
+  become: yes
+  ansible.builtin.shell: |
+    DELTA_VERSION=$(curl -s https://api.github.com/repos/dandavison/delta/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+    curl -sL "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/delta-${DELTA_VERSION}-x86_64-unknown-linux-musl.tar.gz" | tar xz -C /tmp
+    mv /tmp/delta-*/delta /usr/local/bin/
+    rm -rf /tmp/delta-*
+  args:
+    creates: /usr/local/bin/delta
+
+- name: Install yq
+  become: yes
+  ansible.builtin.get_url:
+    url: https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+    dest: /usr/local/bin/yq
+    mode: '0755'
+
+- name: Install just
+  become: yes
+  ansible.builtin.shell: |
+    curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
+  args:
+    creates: /usr/local/bin/just
+
+- name: Install tldr
+  ansible.builtin.shell: |
+    pip3 install --user tldr
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/tldr"
+
+# ===========================================
+# GitHub CLI (gh)
+# ===========================================
+
+- name: Add GitHub CLI repository
+  become: yes
+  ansible.builtin.yum_repository:
+    name: gh-cli
+    description: GitHub CLI
+    baseurl: https://cli.github.com/packages/rpm
+    gpgkey: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x23F3D4EA75716059
+    gpgcheck: yes
+    enabled: yes
+
+- name: Install GitHub CLI
+  become: yes
+  ansible.builtin.dnf:
+    name: gh
+    state: present
+
+- name: Enable and start Docker
+  become: yes
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    enabled: yes
+  ignore_errors: yes
+
+- name: Add user to docker group
+  become: yes
+  ansible.builtin.user:
+    name: "{{ ansible_user_id }}"
+    groups: docker
+    append: yes
+  ignore_errors: yes

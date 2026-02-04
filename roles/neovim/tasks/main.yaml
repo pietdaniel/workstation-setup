@@ -1,0 +1,28 @@
+---
+# Install neovim and configure it
+
+- name: Include Darwin tasks
+  ansible.builtin.include_tasks: darwin.yaml
+  when: ansible_os_family == "Darwin"
+
+- name: Include RedHat tasks
+  ansible.builtin.include_tasks: redhat.yaml
+  when: ansible_os_family == "RedHat"
+
+# Symlink neovim dotfiles
+- name: Symlink neovim dotfiles
+  ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/symlink_dotfiles.yaml"
+
+# Packer installation (cross-platform)
+- name: Check if Packer is already installed
+  ansible.builtin.stat:
+    path: "{{ packer_dest }}"
+  register: packer_stat
+
+- name: Clone Packer repository
+  ansible.builtin.git:
+    repo: "{{ packer_repo }}"
+    dest: "{{ packer_dest }}"
+    depth: 1
+    update: no
+  when: not packer_stat.stat.exists

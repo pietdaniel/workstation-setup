@@ -1,0 +1,40 @@
+---
+# Reusable symlink task - expects 'dotfiles' variable to be set by the calling role
+# Each item needs: { src: "filename", dest: "/full/path/to/dest" }
+#
+# Usage in a role:
+#   - name: Symlink dotfiles
+#     ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/symlink_dotfiles.yaml"
+
+- name: Check for existing non-symlink files
+  ansible.builtin.stat:
+    path: "{{ item.dest }}"
+  register: dotfile_stat
+  loop: "{{ dotfiles }}"
+
+- name: Fail if real file would be overwritten
+  ansible.builtin.fail:
+    msg: "{{ item.item.dest }} exists and is not a symlink. Please backup manually before running."
+  when: item.stat.exists and not item.stat.islnk
+  loop: "{{ dotfile_stat.results }}"
+  loop_control:
+    label: "{{ item.item.dest }}"
+
+- name: Ensure destination directories exist
+  ansible.builtin.file:
+    path: "{{ item.dest | dirname }}"
+    state: directory
+    mode: '0755'
+  loop: "{{ dotfiles }}"
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Create symlinks
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+    force: yes
+  loop: "{{ dotfiles }}"
+  loop_control:
+    label: "{{ item.src }} -> {{ item.dest }}"

@@ -1,0 +1,10 @@
+---
+# Kubernetes tools: kubectl, kubectx, kubens
+
+- name: Include Darwin tasks
+  ansible.builtin.include_tasks: darwin.yaml
+  when: ansible_os_family == "Darwin"
+
+- name: Include RedHat tasks
+  ansible.builtin.include_tasks: redhat.yaml
+  when: ansible_os_family == "RedHat"

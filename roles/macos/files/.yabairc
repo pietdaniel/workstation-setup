@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+
+yabai -m config layout bsp
+yabai -m config mouse_follows_focus off
+# yabai -m config focus_follows_mouse autofocus
+
+yabai -m config auto_balance                 off
+yabai -m config mouse_modifier               fn
+yabai -m config mouse_action1                move
+yabai -m config mouse_action2                resize
+yabai -m config mouse_drop_action            swap
+
+yabai -m rule --add app="^System Settings$" manage=off
+yabai -m rule --add app="^Alfred Preferences$" manage=off
+yabai -m rule --add app="^Preview$" manage=off
+yabai -m rule --add app="^Spotify$" manage=off
+yabai -m rule --add app="^licecap$" manage=off
+yabai -m rule --add app="^Telegram$" manage=off
+yabai -m rule --add app="^Obsidian$" manage=off
+yabai -m rule --add app="^Sonos$" manage=off
+yabai -m rule --add app="^ChatGPT$" manage=off
+yabai -m rule --add app="^simulation-game$" manage=off
+yabai -m rule --add app="^main$" manage=off
+yabai -m rule --add app="^Finder$" manage=off
+yabai -m rule --add app="^1Password$" manage=off
+yabai -m config focus_follows_mouse off

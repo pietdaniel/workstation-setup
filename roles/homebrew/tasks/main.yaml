@@ -1,76 +1,16 @@
 ---
+# Ensure Homebrew is installed and updated (macOS only)
+
 - name: Check if Homebrew is installed
-  command: which brew
+  ansible.builtin.command: which brew
   register: brew_installed
   ignore_errors: yes
+  changed_when: false
 
 - name: Install Homebrew
-  shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  ansible.builtin.shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   when: brew_installed.rc != 0
 
 - name: Update Homebrew
-  homebrew:
+  community.general.homebrew:
     update_homebrew: yes
-  when: brew_installed.rc == 0
-
-- name: Add the Homebrew tap
-  community.general.homebrew_tap:
-    name: koekeishiya/formulae
-    state: present
-
-- name: Install Homebrew packages
-  homebrew:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    # system utils
-    - git
-    - wget
-    - gpg
-    - coreutils
-    # daily driver
-    - starship
-    - zsh
-    - nvim
-    - tmux
-    - koekeishiya/formulae/yabai
-    - koekeishiya/formulae/skhd
-    - font-monaspace
-    # workflow utils
-    - jq
-    - tree
-    - watch
-    - fzf
-    - the_silver_searcher
-    - ripgrep
-    - htop
-    - tldr
-    - just
-    - atuin
-    - yq
-    - pinentry-mac
-    - imagemagick
-    - delta # git diff viewer
-    # cloud utils
-    - awscli
-    - aws-vault
-    - kubectx
-    - kubectl
-    # languages
-    - go
-    # build tools
-    - docker
-    - docker-compose
-    - yarn
-    - npm
-    - trunk-io
-    # databases
-    - postgresql
-
-- name: Install Homebrew Cask packages
-  homebrew:
-    name: "{{ item }}"
-    state: present
-    install_options: 'cask'
-  with_items:
-    - alfred
