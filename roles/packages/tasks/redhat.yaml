@@ -12,7 +12,6 @@
     # system utils
     - git
     - wget
-    - gnupg2
     - util-linux
     - tar
     - gzip
