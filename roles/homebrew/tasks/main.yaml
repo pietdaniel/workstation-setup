@@ -48,7 +48,6 @@
     - just
     - atuin
     - yq
-    - gnugp
     - pinentry-mac
     - imagemagick
     - delta # git diff viewer
