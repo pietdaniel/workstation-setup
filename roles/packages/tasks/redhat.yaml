@@ -106,6 +106,9 @@
     url: https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64
     dest: /usr/local/bin/ttyd
     mode: '0755'
+    timeout: 30
+  retries: 3
+  delay: 5
 
 - name: Install delta (git diff viewer)
   become: yes
