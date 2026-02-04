@@ -120,12 +120,26 @@
 # libwebsockets and ttyd (web-based terminal)
 # ===========================================
 
-- name: Clone libwebsockets repo (v4.3-stable for ttyd compatibility)
+- name: Unshallow libwebsockets repo if needed
+  become: yes
+  ansible.builtin.shell: |
+    cd /opt/libwebsockets
+    if git rev-parse --is-shallow-repository | grep -q true; then
+      git fetch --unshallow --tags
+    else
+      git fetch --tags
+    fi
+  args:
+    chdir: /opt/libwebsockets
+  when: ansible_check_mode == false
+  ignore_errors: yes
+
+- name: Clone libwebsockets repo (v4.3.x for ttyd compatibility)
   become: yes
   ansible.builtin.git:
     repo: https://github.com/warmcat/libwebsockets.git
     dest: /opt/libwebsockets
-    version: v4.3-stable
+    version: v4.3.7
     force: yes
   register: libwebsockets_clone
 
