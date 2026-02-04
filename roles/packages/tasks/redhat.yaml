@@ -140,6 +140,26 @@
   args:
     creates: "{{ ansible_env.HOME }}/.local/bin/tldr"
 
+# ===========================================
+# GitHub CLI (gh)
+# ===========================================
+
+- name: Add GitHub CLI repository
+  become: yes
+  ansible.builtin.yum_repository:
+    name: gh-cli
+    description: GitHub CLI
+    baseurl: https://cli.github.com/packages/rpm
+    gpgkey: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x23F3D4EA75716059
+    gpgcheck: yes
+    enabled: yes
+
+- name: Install GitHub CLI
+  become: yes
+  ansible.builtin.dnf:
+    name: gh
+    state: present
+
 - name: Enable and start Docker
   become: yes
   ansible.builtin.systemd:

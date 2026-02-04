@@ -39,6 +39,8 @@
     # cloud utils
     - awscli
     - aws-vault
+    # github
+    - gh
     # languages
     - go
     # build tools
