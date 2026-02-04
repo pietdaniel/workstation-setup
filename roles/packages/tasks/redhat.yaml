@@ -26,8 +26,15 @@
     # languages
     - golang
     # build tools
+    - cmake
     - docker
+    - gcc
+    - gcc-c++
+    - json-c-devel
+    - libuv-devel
+    - make
     - npm
+    - openssl-devel
     # databases
     - postgresql15-server
 
