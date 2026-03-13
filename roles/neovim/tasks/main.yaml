@@ -28,6 +28,9 @@
   when: not packer_stat.stat.exists
 
 - name: Install Packer plugins headlessly
-  ansible.builtin.command: >
+  ansible.builtin.shell: >
     nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+  environment:
+    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
   changed_when: true
+  timeout: 300

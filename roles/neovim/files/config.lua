@@ -140,21 +140,21 @@ require('packer').startup(function(use)
       'hrsh7th/nvim-cmp',
     },
     config = function()
-      require("obsidian").setup({
-        workspaces = {
-          {
-            name = "main",
-            path = "~/Documents/Obsidian Vault",
+      local vault_path = vim.fn.expand("~/Documents/Obsidian Vault")
+      if vim.fn.isdirectory(vault_path) == 1 then
+        require("obsidian").setup({
+          workspaces = {
+            {
+              name = "main",
+              path = vault_path,
+            },
           },
-        },
-        -- Optional, completion of wiki links, local markdown links, and tags using nvim-cmp.
-        completion = {
-          -- Set to false to disable completion.
-          nvim_cmp = true,
-          -- Trigger completion at 2 chars.
-          min_chars = 2,
-        },
-      })
+          completion = {
+            nvim_cmp = true,
+            min_chars = 2,
+          },
+        })
+      end
     end,
   })
 end)
@@ -307,26 +307,46 @@ vim.api.nvim_set_keymap(
 )
 
 --- treesitter
-require'nvim-treesitter.configs'.setup {
-  ensure_installed = {
-    "c",
-    "lua",
-    "vim",
-    "vimdoc",
-    "query",
-    "javascript",
-    "python",
-    "go",
-    "c_sharp",
-  },
-  sync_install = false,
-  auto_install = true,
-  ignore_install = { "javascript" },
-  highlight = {
-    enable = true,
-    additional_vim_regex_highlighting = false,
-  },
-}
+-- Support both old (master) and new (main) nvim-treesitter branches
+local ts_ok, ts_configs = pcall(require, 'nvim-treesitter.configs')
+if ts_ok then
+  -- Old API (master branch)
+  ts_configs.setup {
+    ensure_installed = {
+      "c", "lua", "vim", "vimdoc", "query",
+      "javascript", "python", "go", "c_sharp",
+    },
+    sync_install = false,
+    auto_install = true,
+    ignore_install = { "javascript" },
+    highlight = {
+      enable = true,
+      additional_vim_regex_highlighting = false,
+    },
+  }
+else
+  -- New API (main branch) - highlight is built into Neovim
+  vim.treesitter.start = vim.treesitter.start or function() end
+  require('nvim-treesitter').setup {}
+  -- Install parsers if missing
+  local parsers = { "c", "lua", "vim", "vimdoc", "query", "javascript", "python", "go", "c_sharp" }
+  local installed = require('nvim-treesitter').get_installed()
+  local installed_set = {}
+  for _, p in ipairs(installed) do installed_set[p] = true end
+  local to_install = {}
+  for _, p in ipairs(parsers) do
+    if not installed_set[p] then table.insert(to_install, p) end
+  end
+  if #to_install > 0 then
+    require('nvim-treesitter').install(to_install)
+  end
+  -- Enable treesitter highlighting for all buffers
+  vim.api.nvim_create_autocmd("FileType", {
+    callback = function()
+      pcall(vim.treesitter.start)
+    end,
+  })
+end
 
 
 --- Project Search
