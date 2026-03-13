@@ -232,15 +232,14 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 vim.api.nvim_set_keymap('n', '<leader>=', '<cmd>lua vim.lsp.buf.format()<CR>', { noremap = true, silent = true })
 
 --- Treesitter
-local parser_config = require'nvim-treesitter.parsers'.get_parser_configs()
-parser_config.gotmpl = {
-  install_info = {
-    url = "https://github.com/ngalaiko/tree-sitter-go-template",
-    files = {"src/parser.c"}
+-- Register go-template filetypes with the gotmpl parser
+-- (parser is provided by the ngalaiko/tree-sitter-go-template plugin)
+vim.filetype.add({
+  extension = {
+    gotmpl = "gotmpl",
   },
-  filetype = "gotmpl",
-  used_by = {"gohtmltmpl", "gotexttmpl", "gotmpl", "yaml"}
-}
+})
+vim.treesitter.language.register("gotmpl", { "gohtmltmpl", "gotexttmpl", "gotmpl" })
 
 --- gruvbox
 require("gruvbox").setup({
