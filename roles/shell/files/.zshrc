@@ -42,8 +42,8 @@ fi
 export GOPATH="$HOME/go"
 
 if [[ "$IS_MACOS" == true ]]; then
-    # Homebrew-installed Go
-    export GOROOT="/opt/homebrew/Cellar/go/1.25.5/libexec"
+    # Homebrew-installed Go (use stable symlink, not version-specific Cellar path)
+    export GOROOT="$(brew --prefix go)/libexec"
 elif [[ "$IS_LINUX" == true ]]; then
     # System Go on Linux
     export GOROOT="/usr/lib/golang"
