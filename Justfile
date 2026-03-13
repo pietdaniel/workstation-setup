@@ -1,7 +1,6 @@
 # Zips and copies latest alfred preferences to this repo
 update-alfred-prefs:
-  zip -r prefs.zip ~/Library/Application\ Support/Alfred/Alfred.alfredpreferences && \
-  mv ./prefs.zip  ./prefs.zip
+  cd ~/Library/Application\ Support/Alfred && zip -r {{justfile_directory()}}/prefs.zip Alfred.alfredpreferences
 
 # Restores alfred preferences from this repo to the local machine
 sync-alfred-prefs:
