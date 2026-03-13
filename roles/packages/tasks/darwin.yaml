@@ -33,6 +33,7 @@
     # cloud utils
     - awscli
     - aws-vault
+    - tfenv
     # github
     - gh
     # languages

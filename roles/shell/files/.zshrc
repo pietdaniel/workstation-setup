@@ -21,6 +21,8 @@ export PATH="$PATH:$HOME/work-scripts"
 export PATH="$PATH:$HOME/go/bin:$HOME/bin"
 export PATH="$HOME/.local/bin:$PATH"
 
+export PATH="$HOME/.npm-global/bin:$PATH"
+
 # macOS-specific paths
 if [[ "$IS_MACOS" == true ]]; then
     # Homebrew shell environment
@@ -335,3 +337,9 @@ bindkey '^[[Z' autosuggest-accept
 if [[ "$IS_MACOS" == true ]] && command -v fnm &>/dev/null; then
     eval "$(fnm env --use-on-cd)"
 fi
+
+# ===========================================
+# stuff
+# ===========================================
+
+alias tf=terraform
