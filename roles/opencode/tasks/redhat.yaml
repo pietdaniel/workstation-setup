@@ -5,55 +5,55 @@
   ansible.builtin.shell: |
     curl -fsSL https://opencode.ai/install | bash
   args:
-    creates: "{{ ansible_env.HOME }}/.local/bin/opencode"
+    creates: "{{ ansible_facts['env']['HOME'] }}/.local/bin/opencode"
 
 - name: Ensure opencode config directory exists
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/opencode"
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/opencode"
     state: directory
     mode: '0755'
 
 - name: Symlink opencode.json config
   ansible.builtin.file:
     src: "{{ role_path }}/files/opencode.json"
-    dest: "{{ ansible_env.HOME }}/.config/opencode/opencode.json"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/opencode/opencode.json"
     state: link
     force: yes
 
 # Skills directory symlink
 - name: Check if skills directory exists and is not a symlink
   ansible.builtin.stat:
-    path: "{{ ansible_env.HOME }}/.config/opencode/skills"
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/opencode/skills"
   register: skills_dir
 
 - name: Remove existing skills directory if not a symlink
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/opencode/skills"
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/opencode/skills"
     state: absent
   when: skills_dir.stat.exists and not skills_dir.stat.islnk
 
 - name: Symlink skills directory
   ansible.builtin.file:
     src: "{{ role_path }}/files/skills"
-    dest: "{{ ansible_env.HOME }}/.config/opencode/skills"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/opencode/skills"
     state: link
     force: yes
 
 # Commands directory symlink
 - name: Check if commands directory exists and is not a symlink
   ansible.builtin.stat:
-    path: "{{ ansible_env.HOME }}/.config/opencode/commands"
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/opencode/commands"
   register: commands_dir
 
 - name: Remove existing commands directory if not a symlink
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/opencode/commands"
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/opencode/commands"
     state: absent
   when: commands_dir.stat.exists and not commands_dir.stat.islnk
 
 - name: Symlink commands directory
   ansible.builtin.file:
     src: "{{ role_path }}/files/commands"
-    dest: "{{ ansible_env.HOME }}/.config/opencode/commands"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/opencode/commands"
     state: link
     force: yes

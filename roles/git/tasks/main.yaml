@@ -20,7 +20,7 @@
 
 - name: Ensure SSH directory exists
   file:
-    path: "{{ ansible_env.HOME }}/.ssh"
+    path: "{{ ansible_facts['env']['HOME'] }}/.ssh"
     state: directory
     mode: '0700'
 
@@ -38,7 +38,7 @@
 
 - name: Generate SSH key for Git (if it does not exist)
   community.crypto.openssh_keypair:
-    path: "{{ ansible_env.HOME }}/.ssh/id_rsa"
+    path: "{{ ansible_facts['env']['HOME'] }}/.ssh/id_rsa"
     type: rsa
     size: 2048
     force: no

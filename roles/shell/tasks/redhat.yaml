@@ -19,4 +19,4 @@
   ansible.builtin.shell: |
     curl -sSL https://raw.githubusercontent.com/atuinsh/atuin/main/install.sh | sh -s -- -y
   args:
-    creates: "{{ ansible_env.HOME }}/.atuin/bin/atuin"
+    creates: "{{ ansible_facts['env']['HOME'] }}/.atuin/bin/atuin"

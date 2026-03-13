@@ -1,19 +1,19 @@
 ---
 - name: Ensure ~/.config directory exists
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config"
+    path: "{{ ansible_facts['env']['HOME'] }}/.config"
     state: directory
     mode: '0755'
 
 - name: Ensure ~/.config/personal directory exists
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/personal"
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/personal"
     state: directory
     mode: '0755'
 
 - name: Ensure secrets.env file exists
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/personal/secrets.env"
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/personal/secrets.env"
     state: touch
     mode: '0600'
     modification_time: preserve
@@ -21,31 +21,31 @@
 
 - name: Create Go workspace directory
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/go"
+    path: "{{ ansible_facts['env']['HOME'] }}/go"
     state: directory
     mode: '0755'
 
 - name: Create Go bin directory
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/go/bin"
+    path: "{{ ansible_facts['env']['HOME'] }}/go/bin"
     state: directory
     mode: '0755'
 
 - name: Create src directory for GitHub projects
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/go/src/github.com"
+    path: "{{ ansible_facts['env']['HOME'] }}/go/src/github.com"
     state: directory
     mode: '0755'
 
 - name: Create src directory for my GitHub projects
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/go/src/github.com/pietdaniel"
+    path: "{{ ansible_facts['env']['HOME'] }}/go/src/github.com/pietdaniel"
     state: directory
     mode: '0755'
 
 - name: Create hacks folder
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/hacks"
+    path: "{{ ansible_facts['env']['HOME'] }}/hacks"
     state: directory
     mode: '0755'
 
@@ -62,7 +62,7 @@
     path: "/usr/local/opt"
     state: directory
     mode: '0755'
-    owner: "{{ ansible_user_id }}"
+    owner: "{{ ansible_facts['user_id'] }}"
 
 - name: Create new-day-counter folder for new-day script
   become: yes
@@ -70,4 +70,4 @@
     path: "/usr/local/opt/new-day-counter"
     state: directory
     mode: '0755'
-    owner: "{{ ansible_user_id }}"
+    owner: "{{ ansible_facts['user_id'] }}"

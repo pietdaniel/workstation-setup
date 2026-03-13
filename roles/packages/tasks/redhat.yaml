@@ -46,7 +46,7 @@
 - name: Install fzf
   ansible.builtin.git:
     repo: https://github.com/junegunn/fzf.git
-    dest: "{{ ansible_env.HOME }}/.fzf"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.fzf"
     depth: 1
   register: fzf_clone
 
@@ -54,7 +54,7 @@
   ansible.builtin.shell: |
     ~/.fzf/install --all --no-bash --no-fish
   args:
-    creates: "{{ ansible_env.HOME }}/.fzf/bin/fzf"
+    creates: "{{ ansible_facts['env']['HOME'] }}/.fzf/bin/fzf"
   when: fzf_clone.changed or not ansible_check_mode
 
 - name: Install ripgrep
@@ -138,7 +138,7 @@
   ansible.builtin.shell: |
     pip3 install --user tldr
   args:
-    creates: "{{ ansible_env.HOME }}/.local/bin/tldr"
+    creates: "{{ ansible_facts['env']['HOME'] }}/.local/bin/tldr"
 
 # ===========================================
 # GitHub CLI (gh)
@@ -171,7 +171,7 @@
 - name: Add user to docker group
   become: yes
   ansible.builtin.user:
-    name: "{{ ansible_user_id }}"
+    name: "{{ ansible_facts['user_id'] }}"
     groups: docker
     append: yes
   ignore_errors: yes

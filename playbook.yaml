@@ -2,7 +2,7 @@
   become: no
   roles:
     - role: homebrew
-      when: ansible_os_family == "Darwin"
+      when: ansible_facts['os_family'] == "Darwin"
     - personal
     - scripts
     - role: dotfiles
@@ -10,7 +10,7 @@
     - role: macos
       become: yes
       tags: macos
-      when: ansible_os_family == "Darwin"
+      when: ansible_facts['os_family'] == "Darwin"
     - role: packages
       tags: packages
     - role: k8s

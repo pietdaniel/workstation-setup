@@ -4,11 +4,11 @@
 # Install packages (OS-specific)
 - name: Include Darwin package tasks
   ansible.builtin.include_tasks: darwin.yaml
-  when: ansible_os_family == "Darwin"
+  when: ansible_facts['os_family'] == "Darwin"
 
 - name: Include RedHat package tasks
   ansible.builtin.include_tasks: redhat.yaml
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['os_family'] == "RedHat"
 
 # Oh My Zsh and plugins (cross-platform)
 - name: Install Oh My Zsh # noqa: latest
@@ -38,7 +38,7 @@
 - name: Change user shell to zsh
   become: true
   ansible.builtin.user:
-    name: "{{ ansible_user_id }}"
+    name: "{{ ansible_facts['user_id'] }}"
     shell: /bin/zsh
 
 # Symlink dotfiles

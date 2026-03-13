@@ -9,6 +9,6 @@
 - name: Create work-scripts folder
   become: no
   file:
-    path: "{{ ansible_env.HOME }}/work-scripts"
+    path: "{{ ansible_facts['env']['HOME'] }}/work-scripts"
     state: directory
     mode: '0755'
