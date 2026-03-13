@@ -19,7 +19,45 @@
 
 - name: Symlink opencode.json config
   ansible.builtin.file:
-    src: "{{ playbook_dir }}/roles/dotfiles/files/opencode.json"
+    src: "{{ role_path }}/files/opencode.json"
     dest: "{{ ansible_env.HOME }}/.config/opencode/opencode.json"
+    state: link
+    force: yes
+
+# Skills directory symlink
+- name: Check if skills directory exists and is not a symlink
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.config/opencode/skills"
+  register: skills_dir
+
+- name: Remove existing skills directory if not a symlink
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config/opencode/skills"
+    state: absent
+  when: skills_dir.stat.exists and not skills_dir.stat.islnk
+
+- name: Symlink skills directory
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/skills"
+    dest: "{{ ansible_env.HOME }}/.config/opencode/skills"
+    state: link
+    force: yes
+
+# Commands directory symlink
+- name: Check if commands directory exists and is not a symlink
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.config/opencode/commands"
+  register: commands_dir
+
+- name: Remove existing commands directory if not a symlink
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config/opencode/commands"
+    state: absent
+  when: commands_dir.stat.exists and not commands_dir.stat.islnk
+
+- name: Symlink commands directory
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/commands"
+    dest: "{{ ansible_env.HOME }}/.config/opencode/commands"
     state: link
     force: yes

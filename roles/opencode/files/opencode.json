@@ -1,0 +1,41 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "brain-code-guru": {
+      "type": "remote",
+      "url": "https://brain-code-guru.roktinternal.com/mcp",
+      "enabled": true
+    },
+    "rokt-code-guru": {
+      "type": "remote",
+      "url": "https://code-guru.roktinternal.com/mcp",
+      "enabled": true
+    },
+    "datadog": {
+      "type": "remote",
+      "url": "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp",
+      "enabled": true
+    },
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "enabled": true,
+      "oauth": false,
+      "headers": {
+        "Authorization": "Bearer ${env:GITHUB_TOKEN}",
+        "User-Agent": "vscode-mcp-client/1.0",
+        "MCP-Protocol-Version": "2.0"
+      }
+    },
+    "buildkite": {
+      "type": "remote",
+      "url": "https://mcp.buildkite.com/mcp",
+      "enabled": true
+    },
+    "mcp.excalidraw.com": {
+      "type": "remote",
+      "url": "https://mcp.excalidraw.com",
+      "oauth": {}
+    }
+  }
+}
