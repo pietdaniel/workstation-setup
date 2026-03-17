@@ -5,3 +5,9 @@
   community.general.homebrew:
     name: nvim
     state: present
+
+- name: Install yaml-language-server globally via npm
+  community.general.npm:
+    name: yaml-language-server
+    global: true
+    state: present

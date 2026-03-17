@@ -157,6 +157,8 @@ require('packer').startup(function(use)
       end
     end,
   })
+
+  use { 'qvalentin/helm-ls.nvim', ft = 'helm' }
 end)
 
 --- Obsidian Config
@@ -428,3 +430,19 @@ end, { silent = true, noremap = true, desc = "Location List (Trouble)" })
 vim.keymap.set("n", "<leader>xQ", function()
   vim.cmd("Trouble qflist toggle")
 end, { silent = true, noremap = true, desc = "Quickfix List (Trouble)" })
+
+-- configure helm
+vim.lsp.config('helm_ls', {
+  cmd = { 'helm_ls', 'serve' },
+  filetypes = { 'helm' },
+  root_markers = { 'Chart.yaml' },
+  settings = {
+    ['helm-ls'] = {
+      yamlls = {
+        path = 'yaml-language-server',
+      },
+    },
+  },
+})
+vim.lsp.enable('helm_ls')
+

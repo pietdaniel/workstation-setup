@@ -46,6 +46,8 @@
     - trunk-io
     # databases
     - postgresql
+    # LSP
+    - helm-ls
 
 - name: Install Homebrew Cask packages
   community.general.homebrew_cask:
