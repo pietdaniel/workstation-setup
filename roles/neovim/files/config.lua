@@ -9,7 +9,7 @@ require('packer').startup(function(use)
   use { 'junegunn/fzf.vim', requires = 'junegunn/fzf' }
   use "ntpeters/vim-better-whitespace"
   use {
-    'nvim-telescope/telescope.nvim', tag = '0.1.6',
+    'nvim-telescope/telescope.nvim',
     requires = { {'nvim-lua/plenary.nvim'} }
   }
   use 'tpope/vim-surround'
