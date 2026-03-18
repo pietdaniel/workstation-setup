@@ -44,6 +44,7 @@
     - yarn
     - npm
     - trunk-io
+    - buf
     # databases
     - postgresql
     # LSP

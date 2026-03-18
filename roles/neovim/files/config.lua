@@ -241,7 +241,8 @@ vim.filetype.add({
     gotmpl = "gotmpl",
   },
 })
-vim.treesitter.language.register("gotmpl", { "gohtmltmpl", "gotexttmpl", "gotmpl" })
+-- using helm-ls instead of this (TSInstall)
+-- vim.treesitter.language.register("gotmpl", { "gohtmltmpl", "gotexttmpl", "gotmpl", "helm" })
 
 --- gruvbox
 require("gruvbox").setup({
