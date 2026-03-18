@@ -134,12 +134,6 @@
   args:
     creates: /usr/local/bin/just
 
-- name: Install tldr
-  ansible.builtin.shell: |
-    pip3 install --user tldr
-  args:
-    creates: "{{ ansible_facts['env']['HOME'] }}/.local/bin/tldr"
-
 # ===========================================
 # GitHub CLI (gh)
 # ===========================================
