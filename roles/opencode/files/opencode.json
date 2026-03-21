@@ -37,5 +37,6 @@
       "url": "https://mcp.excalidraw.com",
       "oauth": {}
     }
-  }
+  },
+  "plugin": ["opencode-anthropic-oauth"]
 }
