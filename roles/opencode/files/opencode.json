@@ -1,5 +1,19 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "read": "allow",
+    "edit": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "external_directory": {
+      "~/ROKT/**": "allow",
+      "/Users/rokt/ROKT/**": "allow",
+      "~/go/src/github.com/ROKT/**": "allow",
+      "/Users/rokt/go/src/github.com/ROKT/**": "allow",
+      "*": "ask"
+    }
+  },
   "mcp": {
     "brain-code-guru": {
       "type": "remote",
