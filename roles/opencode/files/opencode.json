@@ -52,5 +52,5 @@
       "oauth": {}
     }
   },
-  "plugin": ["opencode-anthropic-oauth"]
+  "plugin": ["opencode-claude-bridge"]
 }
