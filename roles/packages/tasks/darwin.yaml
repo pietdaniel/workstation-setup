@@ -29,6 +29,7 @@
     - yq
     - imagemagick
     - delta
+    - grpcurl
     # cloud utils
     - awscli
     - aws-vault
