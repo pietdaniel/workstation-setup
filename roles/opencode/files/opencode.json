@@ -7,11 +7,13 @@
     "grep": "allow",
     "list": "allow",
     "external_directory": {
+      "*": "ask",
       "~/ROKT/**": "allow",
       "/Users/rokt/ROKT/**": "allow",
       "~/go/src/github.com/ROKT/**": "allow",
       "/Users/rokt/go/src/github.com/ROKT/**": "allow",
-      "*": "ask"
+      "/tmp/**": "allow",
+      "/private/tmp/**": "allow"
     }
   },
   "mcp": {
