@@ -52,6 +52,11 @@
       "type": "remote",
       "url": "https://mcp.excalidraw.com",
       "oauth": {}
+    },
+    "mcpgateway-prod": {
+      "type": "remote",
+      "url": "https://mcpgateway-eng-eks-us-west-2.eng.roktinternal.com/mcp",
+      "enabled": true
     }
   },
   "plugin": ["opencode-claude-bridge"]
