@@ -343,3 +343,10 @@ fi
 # ===========================================
 
 alias tf=terraform
+
+# bun completions
+[ -s "/Users/rokt/.bun/_bun" ] && source "/Users/rokt/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
