@@ -17,28 +17,28 @@ Run queries via the helper script:
 
 ```bash
 # Simple query
-python3 ~/.pi/agent/skills/spark-connect/query.py "SELECT 1 as test"
+python3 ~/.config/opencode/skills/spark-connect/query.py "SELECT 1 as test"
 
 # Query with row limit
-python3 ~/.pi/agent/skills/spark-connect/query.py --limit 20 "SELECT * FROM datalake.lake_customerprofile_playground.customerprofile"
+python3 ~/.config/opencode/skills/spark-connect/query.py --limit 20 "SELECT * FROM datalake.lake_customerprofile_playground.customerprofile"
 
 # Describe a table schema
-python3 ~/.pi/agent/skills/spark-connect/query.py --schema "datalake.lake_customerprofile_playground.customerprofile"
+python3 ~/.config/opencode/skills/spark-connect/query.py --schema "datalake.lake_customerprofile_playground.customerprofile"
 
 # Count rows
-python3 ~/.pi/agent/skills/spark-connect/query.py --count "datalake.lake_customerprofile_playground.customerprofile"
+python3 ~/.config/opencode/skills/spark-connect/query.py --count "datalake.lake_customerprofile_playground.customerprofile"
 
 # Output as JSON (for programmatic use)
-python3 ~/.pi/agent/skills/spark-connect/query.py --format json "SELECT * FROM table LIMIT 10"
+python3 ~/.config/opencode/skills/spark-connect/query.py --format json "SELECT * FROM table LIMIT 10"
 
 # Output as CSV
-python3 ~/.pi/agent/skills/spark-connect/query.py --format csv "SELECT * FROM table LIMIT 10"
+python3 ~/.config/opencode/skills/spark-connect/query.py --format csv "SELECT * FROM table LIMIT 10"
 
 # Read SQL from file
-python3 ~/.pi/agent/skills/spark-connect/query.py --file query.sql
+python3 ~/.config/opencode/skills/spark-connect/query.py --file query.sql
 
 # Set up venv without running a query (first-time setup)
-python3 ~/.pi/agent/skills/spark-connect/query.py --setup
+python3 ~/.config/opencode/skills/spark-connect/query.py --setup
 ```
 
 The script auto-creates a Python venv with `pyspark[connect]==3.5.5` on first run.
