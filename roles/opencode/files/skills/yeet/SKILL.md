@@ -10,13 +10,13 @@ description: "Use only when the user explicitly asks to stage, commit, push, and
 
 ## Naming conventions
 
-- Branch: `agent/{description}` when starting from main/master/default.
+- Branch: `dp/{description}` when starting from main/master/default.
 - Commit: `{description}` (terse).
 - PR title: `{description}` summarizing the full diff.
 
 ## Workflow
 
-- If on main/master/default, create a branch: `git checkout -b "agent/{description}"`
+- If on main/master/default, create a branch: `git checkout -b "dp/{description}"`
 - Otherwise stay on the current branch.
 - Confirm status, then stage everything: `git status -sb` then `git add -A`.
 - Commit tersely with the description: `git commit -m "{description}"`
