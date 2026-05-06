@@ -24,5 +24,5 @@ description: "Use only when the user explicitly asks to stage, commit, push, and
 - Push with tracking: `git push -u origin $(git branch --show-current)`
 - If git push fails due to workflow auth errors, pull from master and retry the push.
 - Open a PR and edit title/body to reflect the description and the deltas: `GH_PROMPT_DISABLED=1 GIT_TERMINAL_PROMPT=0 gh pr create --fill --head $(git branch --show-current)`
-- Write the PR description to a temp file with real newlines (e.g. pr-body.md ... EOF) and run pr-body.md to avoid \\n-escaped markdown.
+- Write the PR description to a unique-per-run file under `/tmp` with real newlines, then pass it to `gh pr create --body-file <path>` to avoid `\n`-escaped markdown. Generate the path with `BODY=$(mktemp /tmp/yeet-pr-body.XXXXXX) && mv "$BODY" "$BODY.md" && BODY="$BODY.md"` (note: macOS `mktemp -t` always uses `$TMPDIR` and ignores `/tmp`, so pass the full template path). Fallback: `BODY=/tmp/yeet-pr-body-$(date +%s)-$$.md`. Concurrent yeet runs get distinct paths and cannot clobber each other. Always anchor under `/tmp` (not `$TMPDIR` / `/var/folders/...`). Clean up the file after the PR is created.
 - PR description (markdown) must be detailed prose covering the issue, the cause and effect on users, the root cause, the fix, and any tests or checks used to validate.
