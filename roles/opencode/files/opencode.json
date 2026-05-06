@@ -13,7 +13,8 @@
       "~/go/src/github.com/ROKT/**": "allow",
       "/Users/rokt/go/src/github.com/ROKT/**": "allow",
       "/tmp/**": "allow",
-      "/private/tmp/**": "allow"
+      "/private/tmp/**": "allow",
+      "/Users/rokt/.config/opencode/**": "allow"
     }
   },
   "mcp": {
