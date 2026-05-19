@@ -59,7 +59,7 @@
     "mcpgateway-prod": {
       "type": "remote",
       "url": "https://mcpgateway-eng-eks-us-west-2.eng.roktinternal.com/mcp",
-      "enabled": true
+      "enabled": false
     }
   },
   "plugin": [
