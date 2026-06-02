@@ -4,15 +4,21 @@ Spark Connect query runner — executes a read-only SQL query, writes results
 to a local CSV via Apache Arrow, and prints a compact summary to stdout.
 
 Usage:
-    python run_query.py --sql "SELECT ..."
-    python run_query.py --file query.sql
-    python run_query.py --sql "SELECT ..." --limit 5000
-    python run_query.py --sql "SELECT ..." --output /tmp/my_results.csv
+    python query.py --sql "SELECT ..."
+    python query.py --file query.sql
+    python query.py --sql "SELECT ..." --limit 5000
+    python query.py --sql "SELECT ..." --output /tmp/my_results.csv
+
+The script auto-bootstraps a Python venv at /tmp/spark-connect-venv on first
+run (requires `uv`). Subsequent runs reuse it. Override the venv location
+with the SPARK_CONNECT_VENV env var.
 """
 
 import argparse
 import os
 import re
+import shutil
+import subprocess
 import sys
 import time
 from datetime import datetime
@@ -29,6 +35,57 @@ SPARK_UI_URL = f"https://{SPARK_CONNECT_HOST}"
 RESULTS_DIR = Path("/tmp/spark-results")
 DEFAULT_LIMIT = 1000
 PREVIEW_ROWS = 5
+
+VENV_PATH = Path(os.environ.get("SPARK_CONNECT_VENV", "/tmp/spark-connect-venv"))
+PYSPARK_VERSION = "3.5.5"
+_BOOTSTRAP_MARKER = "SPARK_CONNECT_VENV_BOOTSTRAPPED"
+
+
+# ---------------------------------------------------------------------------
+# Venv bootstrap — re-exec inside the venv if pyspark isn't importable.
+# Runs before any pyspark imports so a bare `python3 query.py ...` works.
+# ---------------------------------------------------------------------------
+def _ensure_venv_and_reexec():
+    """If pyspark isn't importable, create/use a venv and re-exec inside it."""
+    if os.environ.get(_BOOTSTRAP_MARKER):
+        # Already inside the bootstrapped venv (or bootstrap explicitly skipped).
+        return
+    try:
+        import pyspark  # noqa: F401
+        return  # current interpreter is fine
+    except ImportError:
+        pass
+
+    venv_python = VENV_PATH / "bin" / "python"
+
+    if not venv_python.exists():
+        if not shutil.which("uv"):
+            print(
+                "ERROR: pyspark is not installed in the current Python, and `uv` "
+                "is not on PATH to bootstrap a venv.\n"
+                "Install uv (https://docs.astral.sh/uv/) or pre-install pyspark.",
+                file=sys.stderr,
+            )
+            sys.exit(3)
+        print(f"Bootstrapping Spark Connect venv at {VENV_PATH} ...", file=sys.stderr)
+        subprocess.check_call(["uv", "venv", str(VENV_PATH)])
+        subprocess.check_call(
+            [
+                "uv", "pip", "install", "--python", str(venv_python),
+                f"pyspark[connect]=={PYSPARK_VERSION}",
+                "setuptools",  # provides distutils on Python 3.12+
+                "pandas",
+                "pyarrow",
+            ]
+        )
+
+    # Re-exec under the venv interpreter so all subsequent imports resolve.
+    env = os.environ.copy()
+    env[_BOOTSTRAP_MARKER] = "1"
+    os.execvpe(str(venv_python), [str(venv_python), __file__, *sys.argv[1:]], env)
+
+
+_ensure_venv_and_reexec()
 
 # SQL patterns that mutate data — reject immediately
 _MUTATE_PATTERNS = re.compile(
@@ -53,6 +110,20 @@ def _has_limit(sql: str) -> bool:
     # Strip trailing whitespace / semicolons
     stripped = sql.rstrip().rstrip(";").rstrip()
     return bool(re.search(r"\bLIMIT\s+\d+\s*$", stripped, re.IGNORECASE))
+
+
+def _supports_limit(sql: str) -> bool:
+    """Only SELECT / WITH (CTE) queries accept a trailing LIMIT.
+
+    SHOW, DESCRIBE, EXPLAIN, USE etc. are rejected by the parser if a LIMIT
+    is appended — and they already return small bounded result sets, so
+    auto-injection is unnecessary.
+    """
+    leading = sql.lstrip().lstrip("(").lstrip()
+    first_token = re.match(r"\s*(\w+)", leading)
+    if not first_token:
+        return False
+    return first_token.group(1).upper() in {"SELECT", "WITH", "VALUES", "TABLE"}
 
 
 def _append_limit(sql: str, limit: int) -> str:
@@ -119,8 +190,10 @@ def main():
         sys.exit(2)
 
     # --- LIMIT enforcement ---
+    # Only inject LIMIT for SELECT-shaped queries. SHOW / DESCRIBE / EXPLAIN
+    # reject a trailing LIMIT at parse time and already return small results.
     limit_added = False
-    if not args.no_limit and not _has_limit(sql):
+    if not args.no_limit and _supports_limit(sql) and not _has_limit(sql):
         limit = args.limit or DEFAULT_LIMIT
         sql = _append_limit(sql, limit)
         limit_added = True

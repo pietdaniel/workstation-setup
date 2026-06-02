@@ -13,36 +13,70 @@ description: >-
 
 ## Quick Reference
 
-Run queries via the helper script:
+Run queries via the helper script. **Always invoke with system `python3`** — the
+script auto-bootstraps and re-execs itself inside a venv. Do **not** `source`
+the venv first; that is unnecessary and easy to forget.
 
 ```bash
-# Simple query
-python3 ~/.config/opencode/skills/spark-connect/query.py "SELECT 1 as test"
+# SELECT — auto-appends LIMIT 1000 if no LIMIT present
+python3 ~/.config/opencode/skills/spark-connect/query.py \
+    --sql "SELECT * FROM datalake.lake_customerprofile_playground.customerprofile"
 
-# Query with row limit
-python3 ~/.config/opencode/skills/spark-connect/query.py --limit 20 "SELECT * FROM datalake.lake_customerprofile_playground.customerprofile"
+# SELECT with explicit row limit
+python3 ~/.config/opencode/skills/spark-connect/query.py --limit 20 \
+    --sql "SELECT * FROM datalake.lake_customerprofile_playground.customerprofile"
 
-# Describe a table schema
-python3 ~/.config/opencode/skills/spark-connect/query.py --schema "datalake.lake_customerprofile_playground.customerprofile"
+# SELECT with no auto-LIMIT (e.g. for full aggregations)
+python3 ~/.config/opencode/skills/spark-connect/query.py --no-limit \
+    --sql "SELECT COUNT(*) FROM datalake.lake_customerprofile_playground.customerprofile"
 
-# Count rows
-python3 ~/.config/opencode/skills/spark-connect/query.py --count "datalake.lake_customerprofile_playground.customerprofile"
+# Schema / discovery — SHOW / DESCRIBE / EXPLAIN skip LIMIT injection automatically
+python3 ~/.config/opencode/skills/spark-connect/query.py \
+    --sql "DESCRIBE TABLE datalake.lake_customerprofile_playground.customerprofile"
 
-# Output as JSON (for programmatic use)
-python3 ~/.config/opencode/skills/spark-connect/query.py --format json "SELECT * FROM table LIMIT 10"
-
-# Output as CSV
-python3 ~/.config/opencode/skills/spark-connect/query.py --format csv "SELECT * FROM table LIMIT 10"
+python3 ~/.config/opencode/skills/spark-connect/query.py \
+    --sql "SHOW TABLES IN datalake.lake_customerprofile_playground"
 
 # Read SQL from file
 python3 ~/.config/opencode/skills/spark-connect/query.py --file query.sql
 
-# Set up venv without running a query (first-time setup)
-python3 ~/.config/opencode/skills/spark-connect/query.py --setup
+# Override output CSV location (default: /tmp/spark-results/spark_<ts>.csv)
+python3 ~/.config/opencode/skills/spark-connect/query.py \
+    --sql "SELECT ..." --output /tmp/my_results.csv
 ```
 
-The script auto-creates a Python venv with `pyspark[connect]==3.5.5` on first run.
-Subsequent runs reuse the cached venv at `/tmp/spark-connect-venv`.
+### Flags
+
+| Flag | Meaning |
+|------|---------|
+| `--sql STR` | SQL string (mutually exclusive with `--file`) |
+| `--file PATH` | Read SQL from a file |
+| `--limit N` | Override the default auto-LIMIT (1000) for SELECTs |
+| `--no-limit` | Disable auto-LIMIT entirely |
+| `--output PATH` | Write CSV results to a specific path |
+
+The script rejects mutating SQL (INSERT/UPDATE/DELETE/DDL). For writes, drop
+into a custom PySpark script via `scripts/connect.py`.
+
+### Venv bootstrap
+
+First run creates `/tmp/spark-connect-venv` with
+`pyspark[connect]==3.5.5`, `pandas`, `pyarrow`, `setuptools`. Subsequent runs
+reuse it. Requires `uv` on PATH (`brew install uv`).
+
+Override the venv location with `SPARK_CONNECT_VENV=/path/to/venv`.
+
+### Common pitfalls (learned the hard way)
+
+- **Don't `source` the venv manually.** Run `python3 query.py ...` with the
+  system interpreter — it re-execs itself inside the venv. Activating first
+  works but adds steps and obscures what's happening.
+- **Don't append `LIMIT` to `SHOW` / `DESCRIBE` / `EXPLAIN`.** The script
+  detects these and skips the LIMIT, but if you build SQL yourself remember
+  these statements reject a trailing LIMIT at parse time.
+- **Polaris dotted namespaces:** see "Table Naming Convention" below — getting
+  this wrong yields confusing `EntityNotFoundException` or `TABLE_OR_VIEW_NOT_FOUND`
+  errors.
 
 ## Endpoints
 
@@ -65,11 +99,60 @@ Override with `SPARK_CONNECT_URL` env var.
 
 ## Table Naming Convention
 
+### Glue catalogs (`datalake`, `trino`, `iceberg`)
+
 Three-part names: `catalog.database.table`
 
 ```sql
 SELECT * FROM datalake.lake_customerprofile_playground.customerprofile LIMIT 10
 ```
+
+### Polaris catalog (`polaris_datalake`) — multi-level namespaces
+
+Polaris namespaces are hierarchical and frequently contain dots in their
+*displayed* name. Spark Connect resolves each segment as a separate namespace
+level, so write them with bare dots (no quoting needed in Spark):
+
+```sql
+-- Real Rokt example: the namespace tree is
+--   polaris_datalake
+--     └── lake_txn
+--         └── ledger
+--             └── enriched
+--                 └── primary
+--                     ├── viewableimpression
+--                     ├── pricedimpression
+--                     └── ...
+SELECT partnerId, COUNT(*)
+FROM polaris_datalake.lake_txn.ledger.enriched.primary.viewableimpression
+WHERE eventTime >= CURRENT_TIMESTAMP() - INTERVAL 3 HOURS
+GROUP BY partnerId
+```
+
+Discover the tree with:
+
+```sql
+SHOW NAMESPACES IN polaris_datalake
+SHOW NAMESPACES IN polaris_datalake.lake_txn
+SHOW NAMESPACES IN polaris_datalake.lake_txn.ledger.enriched
+SHOW TABLES     IN polaris_datalake.lake_txn.ledger.enriched.primary
+```
+
+### Trino (Superset) quoting differs
+
+The same Polaris table addressed from **Trino** needs the namespace as one
+quoted identifier — bare dots make Trino guess at catalog/schema/table split
+and fail with `SYNTAX_ERROR`:
+
+```sql
+-- Spark Connect
+FROM polaris_datalake.lake_txn.ledger.enriched.primary.viewableimpression
+
+-- Trino / Superset (note the quoted namespace)
+FROM polaris_datalake."lake_txn.ledger.enriched.primary".viewableimpression
+```
+
+See "Spark vs Trino dialect" below for the rest of the gotchas.
 
 ## Common Databases
 
@@ -142,12 +225,33 @@ LIMIT 10
 
 ## Key Tables
 
-| Table | Database | Notes |
-|-------|----------|-------|
-| `customerprofile` | `lake_customerprofile_playground` | Production FeatureStore (610M+ rows) |
-| `consumerprofile_run_*` | `lake_customerprofile_playground` | Per-run profile tables |
-| `jinli_pivoted_canonicalizedcaptureattribute` | `lake_trashbin` | Session attributes (~25B+ rows) |
-| `rainbow_emails` | `lake_customerprofile_playground` | Rainbow table emails |
+| Table | Catalog / namespace | Notes |
+|-------|---------------------|-------|
+| `customerprofile` | `datalake.lake_customerprofile_playground` | Production FeatureStore (610M+ rows) |
+| `consumerprofile_run_*` | `datalake.lake_customerprofile_playground` | Per-run profile tables |
+| `jinli_pivoted_canonicalizedcaptureattribute` | `datalake.lake_trashbin` | Session attributes (~25B+ rows) |
+| `rainbow_emails` | `datalake.lake_customerprofile_playground` | Rainbow table emails |
+| `priced_referral` | `polaris_datalake.lake_txn.transactions.silver.primary` | v4 silver priced-referral (Polaris/Iceberg); partitioned by `day(eventTime)` |
+| `viewableimpression` | `polaris_datalake.lake_txn.ledger.enriched.primary` | Viewable impressions; partitioned by `day(eventTime)`. `advertiserId` is mostly NULL here — use `partnerId` for publisher account aggregation |
+| `pricedimpression` | `polaris_datalake.lake_txn.ledger.enriched.primary` | Priced impressions; sibling of viewableimpression |
+
+## Spark vs Trino dialect
+
+The same datalake is queryable from Spark Connect **and** Trino (Superset).
+A query that runs in Spark often will not run in Trino — translate before
+pasting into Superset.
+
+| Concept | Spark Connect | Trino / Superset |
+|---------|---------------|------------------|
+| Current time | `CURRENT_TIMESTAMP()` (parens OK) | `current_timestamp` (no parens — it's a reserved word, not a function) |
+| Intervals | `INTERVAL 3 HOURS` | `INTERVAL '3' HOUR` (quoted number, singular unit) |
+| Polaris namespace | `polaris_datalake.lake_txn.ledger.enriched.primary.tbl` | `polaris_datalake."lake_txn.ledger.enriched.primary".tbl` |
+| JSON extract | `get_json_object(data, '$.rokt.txnShadow')` | `json_extract_scalar(data, '$["rokt.txnShadow"]')` (dot-keys need bracket notation) |
+| Date parsing | `to_date('2024-01-01')` | `date '2024-01-01'` or `from_iso8601_date(...)` |
+| String concat | `CONCAT(a, b)` or `a || b` | `a || b` (CONCAT also works but `||` is canonical) |
+
+The user-visible failure mode is almost always
+`TrinoUserError(... SYNTAX_ERROR ...)` at the timestamp or interval call site.
 
 ## Known Issues
 
