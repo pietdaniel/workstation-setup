@@ -52,6 +52,59 @@ persistent-workspaces = ["1", "2", "3", "4", "5"]
 # See: https://nikitabobko.github.io/AeroSpace/commands#mode
 on-mode-changed = []
 
+# Apps that should float instead of tile (migrated from yabai 'manage=off' rules)
+[[on-window-detected]]
+    if.app-name-regex-substring = '^System Settings$'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-name-regex-substring = '^Alfred Preferences$'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-name-regex-substring = '^Preview$'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-name-regex-substring = '^Spotify$'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-name-regex-substring = '^licecap$'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-name-regex-substring = '^Telegram$'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-name-regex-substring = '^Obsidian$'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-name-regex-substring = '^Sonos$'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-name-regex-substring = '^ChatGPT$'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-name-regex-substring = '^simulation-game$'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-name-regex-substring = '^main$'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-name-regex-substring = '^Finder$'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-name-regex-substring = '^1Password$'
+    run = 'layout floating'
+
 # When opening a third window in a horizontal workspace, nest it under the
 # second window: 1 | (2 over 3). This mirrors the old yabai BSP habit.
 [[on-window-detected]]
