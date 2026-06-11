@@ -1,12 +1,15 @@
 ---
-# macOS-specific system settings, window manager, and hotkeys
+# macOS-specific system settings, window managers, and hotkeys
 
-# Install yabai, skhd, and pinentry-mac
-- name: Add koekeishiya tap (yabai/skhd)
+# Install window managers, hotkeys, and macOS helpers
+- name: Add Homebrew taps for macOS window managers
   become: no
   community.general.homebrew_tap:
-    name: koekeishiya/formulae
+    name: "{{ item }}"
     state: present
+  loop:
+    - koekeishiya/formulae
+    - nikitabobko/tap
 
 - name: Install yabai, skhd, and pinentry-mac
   become: no
@@ -15,6 +18,12 @@
       - koekeishiya/formulae/yabai
       - koekeishiya/formulae/skhd
       - pinentry-mac
+    state: present
+
+- name: Install Aerospace
+  become: no
+  community.general.homebrew_cask:
+    name: nikitabobko/tap/aerospace
     state: present
 
 # Symlink dotfiles
