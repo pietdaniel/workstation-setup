@@ -11,6 +11,7 @@
       "~/ROKT/**": "allow",
       "/Users/rokt/ROKT/**": "allow",
       "~/go/src/github.com/ROKT/**": "allow",
+      "~/go/**": "allow",
       "/Users/rokt/go/src/github.com/ROKT/**": "allow",
       "/tmp/**": "allow",
       "/private/tmp/**": "allow",
@@ -32,7 +33,7 @@
     "datadog": {
       "type": "remote",
       "url": "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp",
-      "enabled": true
+      "enabled": false
     },
     "github": {
       "type": "remote",
