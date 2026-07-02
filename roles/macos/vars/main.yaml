@@ -1,7 +1,3 @@
 dotfiles:
-  - src: ".yabairc"
-    dest: "{{ ansible_facts['env']['HOME'] }}/.yabairc"
-  - src: ".skhdrc"
-    dest: "{{ ansible_facts['env']['HOME'] }}/.skhdrc"
   - src: ".aerospace.toml"
     dest: "{{ ansible_facts['env']['HOME'] }}/.aerospace.toml"

@@ -74,10 +74,3 @@ else
     exit 1
 fi
 
-# Post-install instructions (macOS only)
-if [[ "$OS" == "darwin" ]]; then
-    echo ""
-    echo "If this is the first time be sure to run:"
-    echo "  yabai --start-service"
-    echo "  skhd --start-service"
-fi

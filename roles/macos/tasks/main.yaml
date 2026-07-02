@@ -2,21 +2,18 @@
 # macOS-specific system settings, window managers, and hotkeys
 
 # Install window managers, hotkeys, and macOS helpers
-- name: Add Homebrew taps for macOS window managers
+- name: Add Homebrew tap for macOS window manager
   become: no
   community.general.homebrew_tap:
     name: "{{ item }}"
     state: present
   loop:
-    - koekeishiya/formulae
     - nikitabobko/tap
 
-- name: Install yabai, skhd, and pinentry-mac
+- name: Install pinentry-mac
   become: no
   community.general.homebrew:
     name:
-      - koekeishiya/formulae/yabai
-      - koekeishiya/formulae/skhd
       - pinentry-mac
     state: present
 
