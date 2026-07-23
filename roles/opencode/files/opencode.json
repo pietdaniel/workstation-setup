@@ -23,7 +23,7 @@
     "brain-code-guru": {
       "type": "remote",
       "url": "https://brain-code-guru.roktinternal.com/mcp",
-      "enabled": true
+      "enabled": false
     },
     "rokt-code-guru": {
       "type": "remote",
@@ -38,7 +38,7 @@
     "github": {
       "type": "remote",
       "url": "https://api.githubcopilot.com/mcp/",
-      "enabled": true,
+      "enabled": false,
       "oauth": false,
       "headers": {
         "Authorization": "Bearer ${env:GITHUB_TOKEN}",
@@ -49,11 +49,12 @@
     "buildkite": {
       "type": "remote",
       "url": "https://mcp.buildkite.com/mcp",
-      "enabled": true
+      "enabled": false
     },
     "mcp.excalidraw.com": {
       "type": "remote",
       "url": "https://mcp.excalidraw.com",
+      "enabled": false,
       "oauth": {}
     },
     "mcpgateway-prod": {
