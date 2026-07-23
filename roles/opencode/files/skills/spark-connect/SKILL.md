@@ -11,6 +11,33 @@ description: >-
 
 # Spark Connect — Rokt Datalake
 
+Queries go through an authenticating gateway that verifies the caller's Google
+identity and starts a dedicated per-user Spark engine. Datalake access and
+Polaris RBAC are therefore enforced as the caller, not as a shared identity.
+
+## Authentication
+
+The gateway requires a fresh Google ID token on every connection. One-time
+setup downloads the canonical, pinned `sc_login.py` from `ROKT/spark-infra` and
+opens a browser login:
+
+```bash
+bash ~/.config/opencode/skills/spark-connect/scripts/setup_env.sh
+python3 ~/.sc/sc_login.py
+```
+
+The bundled query helpers call `sc_login.py --print` themselves, including
+silent refresh when needed. Never print, log, commit, or put the token in shell
+history. For a custom client, use:
+
+```bash
+export SPARK_CONNECT_TOKEN="$(python3 ~/.sc/sc_login.py --print)"
+```
+
+Queries run with the caller's grants. A `Forbidden` or access-denied response
+for an ungranted table is expected; request access rather than trying to bypass
+the gateway.
+
 ## Quick Reference
 
 Run queries via the helper script. **Always invoke with system `python3`** — the
@@ -20,22 +47,22 @@ the venv first; that is unnecessary and easy to forget.
 ```bash
 # SELECT — auto-appends LIMIT 1000 if no LIMIT present
 python3 ~/.config/opencode/skills/spark-connect/query.py \
-    --sql "SELECT * FROM datalake.lake_customerprofile_playground.customerprofile"
+    --sql "SELECT * FROM aws_legacy_datalake.lake_customerprofile_playground.customerprofile"
 
 # SELECT with explicit row limit
 python3 ~/.config/opencode/skills/spark-connect/query.py --limit 20 \
-    --sql "SELECT * FROM datalake.lake_customerprofile_playground.customerprofile"
+    --sql "SELECT * FROM aws_legacy_datalake.lake_customerprofile_playground.customerprofile"
 
 # SELECT with no auto-LIMIT (e.g. for full aggregations)
 python3 ~/.config/opencode/skills/spark-connect/query.py --no-limit \
-    --sql "SELECT COUNT(*) FROM datalake.lake_customerprofile_playground.customerprofile"
+    --sql "SELECT COUNT(*) FROM aws_legacy_datalake.lake_customerprofile_playground.customerprofile"
 
 # Schema / discovery — SHOW / DESCRIBE / EXPLAIN skip LIMIT injection automatically
 python3 ~/.config/opencode/skills/spark-connect/query.py \
-    --sql "DESCRIBE TABLE datalake.lake_customerprofile_playground.customerprofile"
+    --sql "DESCRIBE TABLE aws_legacy_datalake.lake_customerprofile_playground.customerprofile"
 
 python3 ~/.config/opencode/skills/spark-connect/query.py \
-    --sql "SHOW TABLES IN datalake.lake_customerprofile_playground"
+    --sql "SHOW TABLES IN aws_legacy_datalake.lake_customerprofile_playground"
 
 # Read SQL from file
 python3 ~/.config/opencode/skills/spark-connect/query.py --file query.sql
@@ -61,8 +88,9 @@ into a custom PySpark script via `scripts/connect.py`.
 ### Venv bootstrap
 
 First run creates `/tmp/spark-connect-venv` with
-`pyspark[connect]==3.5.5`, `pandas`, `pyarrow`, `setuptools`. Subsequent runs
-reuse it. Requires `uv` on PATH (`brew install uv`).
+`pyspark[connect]==3.5.7`, `pandas`, `pyarrow`, `setuptools`. Spark Connect
+clients must remain on 3.5.x to match the gateway's Spark 3.5 engine. Subsequent
+runs reuse it. Requires `uv` on PATH (`brew install uv`).
 
 Override the venv location with `SPARK_CONNECT_VENV=/path/to/venv`.
 
@@ -77,34 +105,41 @@ Override the venv location with `SPARK_CONNECT_VENV=/path/to/venv`.
 - **Polaris dotted namespaces:** see "Table Naming Convention" below — getting
   this wrong yields confusing `EntityNotFoundException` or `TABLE_OR_VIEW_NOT_FOUND`
   errors.
+- **Treat `Forbidden` as an access result.** The gateway queries as you, so
+  request the missing Polaris grant instead of retrying through the retired
+  shared endpoint.
 
 ## Endpoints
 
 | Endpoint | URL |
 |----------|-----|
-| **Prod (us-west-2)** | `sc://spark-connect-us-west-2.roktinternal.com:15002/;use_ssl=true` |
-| **Stage (us-west-2)** | `sc://spark-connect-us-west-2.stage.roktinternal.com:15002/;use_ssl=true` |
-| **Spark UI (prod)** | `https://spark-connect-us-west-2.roktinternal.com:4040` |
+| **Prod (us-west-2)** | `sc://spark-connect-gateway-us-west-2.roktinternal.com:15003/;use_ssl=true;token=<GOOGLE_ID_TOKEN>` |
+| **Stage (us-west-2)** | `sc://spark-connect-gateway-us-west-2.stage.roktinternal.com:15003/;use_ssl=true;token=<GOOGLE_ID_TOKEN>` |
+| **Gateway management** | `https://spark-connect-gateway-us-west-2.roktinternal.com/ui/management/engine` |
 
-Override with `SPARK_CONNECT_URL` env var.
+The helpers fetch a token automatically. Override individual settings with
+`SPARK_CONNECT_HOST`, `SPARK_CONNECT_PORT`, `SPARK_CONNECT_TOKEN`, or `SC_LOGIN`.
+A full `SPARK_CONNECT_URL` overrides all of them and must include authentication.
+There is no shared Spark UI; each per-user engine has its own driver UI, linked
+from the authenticated gateway management page.
 
 ## Available Catalogs
 
 | Catalog | Type | Description |
 |---------|------|-------------|
-| `datalake` | AWS Glue | **Default.** Main datalake catalog |
+| `aws_legacy_datalake` | AWS Glue | **Default.** Main legacy datalake catalog (called `datalake` on the retired shared server) |
 | `trino` | AWS Glue | Trino-compatible catalog (prod only) |
 | `iceberg` | AWS Glue | Identity builder catalog (prod only) |
-| `polaris_datalake` | Polaris REST | Polaris catalog (stage & prod) |
+| `polaris_datalake` | Polaris REST | Polaris catalog with per-user RBAC (stage & prod) |
 
 ## Table Naming Convention
 
-### Glue catalogs (`datalake`, `trino`, `iceberg`)
+### Glue catalogs (`aws_legacy_datalake`, `trino`, `iceberg`)
 
 Three-part names: `catalog.database.table`
 
 ```sql
-SELECT * FROM datalake.lake_customerprofile_playground.customerprofile LIMIT 10
+SELECT * FROM aws_legacy_datalake.lake_customerprofile_playground.customerprofile LIMIT 10
 ```
 
 ### Polaris catalog (`polaris_datalake`) — multi-level namespaces
@@ -168,43 +203,43 @@ See "Spark vs Trino dialect" below for the rest of the gotchas.
 
 ```sql
 -- List databases in a catalog
-SHOW DATABASES IN datalake
+SHOW DATABASES IN aws_legacy_datalake
 
 -- List tables in a database
-SHOW TABLES IN datalake.lake_customerprofile_playground
+SHOW TABLES IN aws_legacy_datalake.lake_customerprofile_playground
 
 -- Describe table schema
-DESCRIBE EXTENDED datalake.lake_customerprofile_playground.customerprofile
+DESCRIBE EXTENDED aws_legacy_datalake.lake_customerprofile_playground.customerprofile
 
 -- Iceberg metadata
-SELECT * FROM datalake.lake_customerprofile_playground.customerprofile.snapshots ORDER BY committed_at DESC
-SELECT * FROM datalake.lake_customerprofile_playground.customerprofile.files
-SELECT * FROM datalake.lake_customerprofile_playground.customerprofile.history
+SELECT * FROM aws_legacy_datalake.lake_customerprofile_playground.customerprofile.snapshots ORDER BY committed_at DESC
+SELECT * FROM aws_legacy_datalake.lake_customerprofile_playground.customerprofile.files
+SELECT * FROM aws_legacy_datalake.lake_customerprofile_playground.customerprofile.history
 ```
 
 ## Write Operations
 
-Spark Connect is **fully read-write**. All Iceberg DDL/DML is supported:
+Spark Connect supports Iceberg DDL/DML where the caller's grants permit it:
 
 ```sql
 -- Create table (CTAS)
-CREATE TABLE datalake.db.my_table USING iceberg AS SELECT * FROM source
+CREATE TABLE aws_legacy_datalake.db.my_table USING iceberg AS SELECT * FROM source
 
 -- Insert / Append
-INSERT INTO datalake.db.my_table SELECT * FROM source
+INSERT INTO aws_legacy_datalake.db.my_table SELECT * FROM source
 
 -- Update
-UPDATE datalake.db.my_table SET col = value WHERE condition
+UPDATE aws_legacy_datalake.db.my_table SET col = value WHERE condition
 
 -- Delete
-DELETE FROM datalake.db.my_table WHERE condition
+DELETE FROM aws_legacy_datalake.db.my_table WHERE condition
 
 -- Compaction
-CALL datalake.system.rewrite_data_files(table => 'datalake.db.table', strategy => 'sort', ...)
+CALL aws_legacy_datalake.system.rewrite_data_files(table => 'aws_legacy_datalake.db.table', strategy => 'sort', ...)
 
 -- Alter
-ALTER TABLE datalake.db.my_table ADD COLUMN new_col STRING
-ALTER TABLE datalake.db.my_table WRITE ORDERED BY col1, col2
+ALTER TABLE aws_legacy_datalake.db.my_table ADD COLUMN new_col STRING
+ALTER TABLE aws_legacy_datalake.db.my_table WRITE ORDERED BY col1, col2
 ```
 
 ## Nested Struct Patterns
@@ -227,10 +262,10 @@ LIMIT 10
 
 | Table | Catalog / namespace | Notes |
 |-------|---------------------|-------|
-| `customerprofile` | `datalake.lake_customerprofile_playground` | Production FeatureStore (610M+ rows) |
-| `consumerprofile_run_*` | `datalake.lake_customerprofile_playground` | Per-run profile tables |
-| `jinli_pivoted_canonicalizedcaptureattribute` | `datalake.lake_trashbin` | Session attributes (~25B+ rows) |
-| `rainbow_emails` | `datalake.lake_customerprofile_playground` | Rainbow table emails |
+| `customerprofile` | `aws_legacy_datalake.lake_customerprofile_playground` | Production FeatureStore (610M+ rows) |
+| `consumerprofile_run_*` | `aws_legacy_datalake.lake_customerprofile_playground` | Per-run profile tables |
+| `jinli_pivoted_canonicalizedcaptureattribute` | `aws_legacy_datalake.lake_trashbin` | Session attributes (~25B+ rows) |
+| `rainbow_emails` | `aws_legacy_datalake.lake_customerprofile_playground` | Rainbow table emails |
 | `priced_referral` | `polaris_datalake.lake_txn.transactions.silver.primary` | v4 silver priced-referral (Polaris/Iceberg); partitioned by `day(eventTime)` |
 | `viewableimpression` | `polaris_datalake.lake_txn.ledger.enriched.primary` | Viewable impressions; partitioned by `day(eventTime)`. `advertiserId` is mostly NULL here — use `partnerId` for publisher account aggregation |
 | `pricedimpression` | `polaris_datalake.lake_txn.ledger.enriched.primary` | Priced impressions; sibling of viewableimpression |
@@ -263,10 +298,10 @@ The user-visible failure mode is almost always
 - **Session scope:** `USE catalog.database` is session-scoped. Always use fully-qualified
   table names in scripts.
 
-## Cluster Resources
+## Per-User Engine Resources
 
 - **Driver:** 16 cores, 100GB Spark memory
-- **Executors:** Up to 384 × (23 cores, 80GB each) with dynamic allocation
-- **Idle timeout:** Executors reclaimed after 10s idle
+- **Executors:** Up to 40 per user × (23 cores, 80GB each) with dynamic allocation
+- **Idle timeout:** Executors are reclaimed after 60s idle; an idle engine
+  terminates after about five minutes and is recreated by the next query
 - **Network:** Only accessible from SDP network (10.0.0.0/8)
-

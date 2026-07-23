@@ -8,17 +8,14 @@ Usage:
     spark.sql("SHOW DATABASES").show()
 """
 
+from gateway import endpoint_description, spark_connect_url
 from pyspark.sql import SparkSession
-
-SPARK_CONNECT_HOST = "spark-connect-us-west-2.roktinternal.com"
-SPARK_CONNECT_PORT = "15002"
-SPARK_CONNECT_URL = f"sc://{SPARK_CONNECT_HOST}:{SPARK_CONNECT_PORT}/;use_ssl=true"
 
 
 def get_spark_session() -> SparkSession:
     """Create and return a remote SparkSession via Spark Connect."""
-    spark = SparkSession.builder.remote(SPARK_CONNECT_URL).getOrCreate()
-    print(f"Connected to Spark Connect at {SPARK_CONNECT_HOST}:{SPARK_CONNECT_PORT}")
+    spark = SparkSession.builder.remote(spark_connect_url()).getOrCreate()
+    print(f"Connected to Spark Connect at {endpoint_description()}")
     print(f"Spark version: {spark.version}")
     return spark
 
@@ -30,4 +27,4 @@ if __name__ == "__main__":
     spark.sql("SHOW NAMESPACES IN polaris_datalake").show()
     # Legacy Glue catalog still available
     print("\nVerification — Glue catalog (legacy):")
-    spark.sql("SHOW DATABASES IN datalake").show()
+    spark.sql("SHOW DATABASES IN aws_legacy_datalake").show()

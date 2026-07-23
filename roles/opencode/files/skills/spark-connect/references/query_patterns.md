@@ -30,13 +30,13 @@ From `DESCRIBE TABLE EXTENDED`, note:
 .venv-spark/bin/python <skill_path>/scripts/run_query.py --sql "SHOW DATABASES" --no-limit
 
 # List tables in a database
-.venv-spark/bin/python <skill_path>/scripts/run_query.py --sql "SHOW TABLES IN datalake.lake_rdn_enriched" --no-limit
+.venv-spark/bin/python <skill_path>/scripts/run_query.py --sql "SHOW TABLES IN aws_legacy_datalake.lake_rdn_enriched" --no-limit
 
 # Describe a table's schema
-.venv-spark/bin/python <skill_path>/scripts/run_query.py --sql "DESCRIBE TABLE datalake.lake_rdn_enriched.impression" --no-limit
+.venv-spark/bin/python <skill_path>/scripts/run_query.py --sql "DESCRIBE TABLE aws_legacy_datalake.lake_rdn_enriched.impression" --no-limit
 
 # Extended table info (partitions, storage, properties)
-.venv-spark/bin/python <skill_path>/scripts/run_query.py --sql "DESCRIBE TABLE EXTENDED datalake.lake_rdn_enriched.impression" --no-limit
+.venv-spark/bin/python <skill_path>/scripts/run_query.py --sql "DESCRIBE TABLE EXTENDED aws_legacy_datalake.lake_rdn_enriched.impression" --no-limit
 ```
 
 ## Table Stats via Iceberg Metadata Tables
@@ -100,11 +100,11 @@ Iceberg metadata tables instead of scanning the full table. This is much faster.
 ```bash
 # Quick sample (auto-limited to 1000 rows)
 .venv-spark/bin/python <skill_path>/scripts/run_query.py \
-  --sql "SELECT * FROM datalake.lake_rdn_enriched.impression"
+  --sql "SELECT * FROM aws_legacy_datalake.lake_rdn_enriched.impression"
 
 # With explicit limit
 .venv-spark/bin/python <skill_path>/scripts/run_query.py \
-  --sql "SELECT col1, col2, col3 FROM datalake.lake_rdn_enriched.impression LIMIT 100"
+  --sql "SELECT col1, col2, col3 FROM aws_legacy_datalake.lake_rdn_enriched.impression LIMIT 100"
 ```
 
 ## Aggregation Patterns
@@ -113,7 +113,7 @@ Iceberg metadata tables instead of scanning the full table. This is much faster.
 # Group by with aggregation
 .venv-spark/bin/python <skill_path>/scripts/run_query.py --sql "
   SELECT date_col, COUNT(*) as cnt, AVG(metric) as avg_metric
-  FROM datalake.lake_rdn_enriched.impression
+  FROM aws_legacy_datalake.lake_rdn_enriched.impression
   WHERE date_col >= '2024-01-01'
   GROUP BY date_col
   ORDER BY date_col

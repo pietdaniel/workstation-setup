@@ -8,7 +8,7 @@ appended to the table name with a dot suffix.
 ```sql
 SELECT * FROM <catalog>.<database>.<table>.<metadata_table>
 -- Example:
-SELECT * FROM datalake.lake_rdn_enriched.impression.snapshots
+SELECT * FROM aws_legacy_datalake.lake_rdn_enriched.impression.snapshots
 ```
 
 ## Metadata Tables

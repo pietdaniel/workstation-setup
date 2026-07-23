@@ -24,20 +24,17 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+from scripts.gateway import endpoint_description, spark_connect_url
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-SPARK_CONNECT_HOST = "spark-connect-us-west-2.roktinternal.com"
-SPARK_CONNECT_PORT = "15002"
-SPARK_CONNECT_URL = f"sc://{SPARK_CONNECT_HOST}:{SPARK_CONNECT_PORT}/;use_ssl=true"
-SPARK_UI_URL = f"https://{SPARK_CONNECT_HOST}"
-
 RESULTS_DIR = Path("/tmp/spark-results")
 DEFAULT_LIMIT = 1000
 PREVIEW_ROWS = 5
 
 VENV_PATH = Path(os.environ.get("SPARK_CONNECT_VENV", "/tmp/spark-connect-venv"))
-PYSPARK_VERSION = "3.5.5"
+PYSPARK_VERSION = "3.5.7"
 _BOOTSTRAP_MARKER = "SPARK_CONNECT_VENV_BOOTSTRAPPED"
 
 
@@ -46,29 +43,41 @@ _BOOTSTRAP_MARKER = "SPARK_CONNECT_VENV_BOOTSTRAPPED"
 # Runs before any pyspark imports so a bare `python3 query.py ...` works.
 # ---------------------------------------------------------------------------
 def _ensure_venv_and_reexec():
-    """If pyspark isn't importable, create/use a venv and re-exec inside it."""
+    """Ensure the gateway-compatible PySpark version and re-exec if needed."""
     if os.environ.get(_BOOTSTRAP_MARKER):
-        # Already inside the bootstrapped venv (or bootstrap explicitly skipped).
         return
     try:
-        import pyspark  # noqa: F401
-        return  # current interpreter is fine
+        import pyspark
+
+        if pyspark.__version__ == PYSPARK_VERSION:
+            return
     except ImportError:
         pass
 
     venv_python = VENV_PATH / "bin" / "python"
+    venv_ready = venv_python.exists() and subprocess.run(
+        [
+            str(venv_python),
+            "-c",
+            f"import pyspark; assert pyspark.__version__ == '{PYSPARK_VERSION}'",
+        ],
+        capture_output=True,
+    ).returncode == 0
 
-    if not venv_python.exists():
+    if not venv_ready:
         if not shutil.which("uv"):
             print(
-                "ERROR: pyspark is not installed in the current Python, and `uv` "
-                "is not on PATH to bootstrap a venv.\n"
-                "Install uv (https://docs.astral.sh/uv/) or pre-install pyspark.",
+                f"ERROR: pyspark {PYSPARK_VERSION} is required, and `uv` is not "
+                "on PATH to bootstrap it.\nInstall uv "
+                "(https://docs.astral.sh/uv/) or install the required PySpark version.",
                 file=sys.stderr,
             )
             sys.exit(3)
-        print(f"Bootstrapping Spark Connect venv at {VENV_PATH} ...", file=sys.stderr)
-        subprocess.check_call(["uv", "venv", str(VENV_PATH)])
+        if not venv_python.exists():
+            print(f"Bootstrapping Spark Connect venv at {VENV_PATH} ...", file=sys.stderr)
+            subprocess.check_call(["uv", "venv", str(VENV_PATH)])
+        else:
+            print(f"Updating Spark Connect venv at {VENV_PATH} ...", file=sys.stderr)
         subprocess.check_call(
             [
                 "uv", "pip", "install", "--python", str(venv_python),
@@ -200,9 +209,8 @@ def main():
 
     csv_path = _output_path(args.output)
 
-    # --- Print Spark UI link immediately ---
-    print(f"Spark Connect UI: {SPARK_UI_URL}")
-    print(f"Connecting to   : {SPARK_CONNECT_URL}")
+    # Fetch the token at connection time and never include it in output.
+    print(f"Connecting to   : {endpoint_description()}")
     print(f"Output will be  : {csv_path}")
     print("Executing query ...")
     sys.stdout.flush()
@@ -211,7 +219,7 @@ def main():
     from pyspark.sql import SparkSession
 
     t0 = time.time()
-    spark = SparkSession.builder.remote(SPARK_CONNECT_URL).getOrCreate()
+    spark = SparkSession.builder.remote(spark_connect_url()).getOrCreate()
     spark.conf.set("spark.sql.execution.arrow.pyspark.enabled", "true")
     # AQE tuning: prevent coalescing to too few partitions on CPU-heavy queries
     spark.conf.set("spark.sql.adaptive.advisoryPartitionSizeInBytes", "1m")

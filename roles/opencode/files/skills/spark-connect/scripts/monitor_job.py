@@ -21,6 +21,7 @@ Usage:
 
 import argparse
 import json
+import os
 import sys
 import urllib.request
 import urllib.error
@@ -29,7 +30,12 @@ from datetime import datetime, timezone
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-SPARK_UI_BASE = "https://spark-connect-us-west-2.roktinternal.com"
+# Each gateway user has a separate engine and driver UI. Set this to the
+# authenticated engine UI URL shown by the gateway management page.
+SPARK_UI_BASE = os.environ.get(
+    "SPARK_CONNECT_UI_URL",
+    "https://spark-connect-gateway-us-west-2.roktinternal.com",
+)
 API_BASE = f"{SPARK_UI_BASE}/api/v1"
 
 

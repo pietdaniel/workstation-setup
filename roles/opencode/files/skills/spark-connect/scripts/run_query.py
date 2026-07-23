@@ -18,13 +18,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-# ---------------------------------------------------------------------------
-# Constants
-# ---------------------------------------------------------------------------
-SPARK_CONNECT_HOST = "spark-connect-us-west-2.roktinternal.com"
-SPARK_CONNECT_PORT = "15002"
-SPARK_CONNECT_URL = f"sc://{SPARK_CONNECT_HOST}:{SPARK_CONNECT_PORT}/;use_ssl=true"
-SPARK_UI_URL = f"https://{SPARK_CONNECT_HOST}"
+from gateway import endpoint_description, spark_connect_url
 
 RESULTS_DIR = Path("/tmp/spark-results")
 DEFAULT_LIMIT = 1000
@@ -127,9 +121,8 @@ def main():
 
     csv_path = _output_path(args.output)
 
-    # --- Print Spark UI link immediately ---
-    print(f"Spark Connect UI: {SPARK_UI_URL}")
-    print(f"Connecting to   : {SPARK_CONNECT_URL}")
+    # Fetch the token at connection time and never include it in output.
+    print(f"Connecting to   : {endpoint_description()}")
     print(f"Output will be  : {csv_path}")
     print("Executing query ...")
     sys.stdout.flush()
@@ -138,7 +131,7 @@ def main():
     from pyspark.sql import SparkSession
 
     t0 = time.time()
-    spark = SparkSession.builder.remote(SPARK_CONNECT_URL).getOrCreate()
+    spark = SparkSession.builder.remote(spark_connect_url()).getOrCreate()
     spark.conf.set("spark.sql.execution.arrow.pyspark.enabled", "true")
     # AQE tuning: prevent coalescing to too few partitions on CPU-heavy queries
     spark.conf.set("spark.sql.adaptive.advisoryPartitionSizeInBytes", "1m")
