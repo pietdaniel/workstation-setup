@@ -1,249 +1,264 @@
 ---
 name: buildkite
-description: "Query the Buildkite REST API using BUILDKITE_TOKEN (bearer auth) against https://api.buildkite.com/v2. Use for investigating build failures, pulling build/job logs, listing pipelines, downloading artifacts, retrying jobs, and debugging CI issues."
+description: "Interact with Buildkite via the `bk` CLI (preferred) or the REST API (fallback). Investigate build failures, pull job logs, list pipelines/builds, retry jobs, create builds, download artifacts, unblock steps, and debug CI issues. IMPORTANT: Always load this skill when the user shares a buildkite.com URL."
 ---
 
 # Buildkite
 
 ## Overview
 
-Use the Buildkite REST API to investigate builds, pull logs, identify failures, download artifacts, and manage pipelines. Authentication is via the `BUILDKITE_TOKEN` environment variable as a Bearer token.
+Two ways to interact with Buildkite, in order of preference:
 
-## Quick Start
+1. **`bk` CLI** (v3.27+, installed at `/opt/homebrew/bin/bk`) — use for everything it supports.
+2. **REST API** (`https://api.buildkite.com/v2` via `curl`) — fallback for endpoints the CLI doesn't cover (e.g. annotations, job env vars) or when `bk` is unavailable.
+
+## Authentication
+
+Both methods use the `BUILDKITE_TOKEN` environment variable, already available in the shell.
+
+**CLI** — requires two env vars. Always set them as inline prefixes (do NOT export globally):
 
 ```bash
-curl -sS \
-  -H "Authorization: Bearer $BUILDKITE_TOKEN" \
+BUILDKITE_API_TOKEN=$BUILDKITE_TOKEN BUILDKITE_ORGANIZATION_SLUG=rokt bk <command>
+```
+
+- The default org slug is `rokt`.
+- For brevity, all CLI examples below omit the env prefix. Always include it when running commands.
+
+**REST API** — bearer auth:
+
+```bash
+curl -sS -H "Authorization: Bearer $BUILDKITE_TOKEN" \
   "https://api.buildkite.com/v2/<endpoint>"
 ```
 
-All endpoints use base URL `https://api.buildkite.com/v2`.
+Token scopes needed: `read_builds`, `read_build_logs`, `read_artifacts`, `read_job_env`, `write_builds` (for mutations).
 
-## URL Pattern Convention
+## Parsing Build URLs
 
-Most endpoints follow this hierarchy:
+Given `https://buildkite.com/{org}/{pipeline}/builds/{number}#job-uuid`:
+
+- **org** = `rokt` (usually)
+- **pipeline** = the pipeline slug
+- **build number** = integer after `/builds/` (NOT the build UUID)
+- **fragment after `#`** = usually the job UUID (use for `bk job log`, `bk job retry`, etc.). If it doesn't resolve, fetch the build and find the job by name/step key in `jobs[]`.
+
+---
+
+## CLI Global Flags
+
+| Flag | Description |
+|------|-------------|
+| `-h, --help` | Context-sensitive help |
+| `-y, --yes` | Skip confirmation prompts |
+| `--no-input` | Disable interactive prompts |
+| `-q, --quiet` | Suppress progress output |
+| `--no-pager` | Disable pager for text output |
+| `--debug` | Enable debug output for REST API calls |
+| `-o, --output` | Output format: `json`, `yaml`, `text` (where supported) |
+
+---
+
+## CLI Command Reference
+
+### Builds
+
+#### `bk build view [<build-number>]`
+View build information. If build number is omitted, shows most recent build on current branch.
+
+```bash
+bk build view 17025 -p upsells-dd-terraform      # specific build
+bk build view -p my-pipeline                     # most recent on current branch
+bk build view -b main -p my-pipeline             # filter by branch
+bk build view --mine -p my-pipeline              # your most recent build
+bk build view -w 429 -p my-pipeline              # open in browser
+bk build view 17025 -p my-pipeline -o json       # JSON output
+```
+
+Key flags: `-p/--pipeline`, `-b/--branch`, `-u/--user`, `--mine`, `-w/--web`, `-o/--output`
+
+#### `bk build list`
+List builds with filtering.
+
+```bash
+bk build list -p my-pipeline                                        # recent (default 50)
+bk build list -p my-pipeline --state failed --branch main --since 24h
+bk build list -p my-pipeline --duration ">20m"                      # long builds
+bk build list -p my-pipeline --creator alice@company.com
+bk build list -p my-pipeline --commit abc123def456
+bk build list -p my-pipeline --message deploy
+bk build list -p my-pipeline --meta-data env=production
+bk build list -p my-pipeline --limit 500
+bk build list -p my-pipeline --state failed -o json
+```
+
+Server-side filters (fast): `--pipeline`, `--since`, `--until`, `--state`, `--branch`, `--creator`, `--commit`, `--meta-data`
+Client-side filters: `--duration`, `--message`
+
+#### `bk build create`
+Create (trigger) a new build.
+
+```bash
+bk build create -p my-pipeline                        # default branch
+bk build create -p my-pipeline -b feature-x -c abc123 # branch/commit
+bk build create -p my-pipeline -e "FOO=BAR" -e "BAZ=QUX"
+bk build create -p my-pipeline -M "env=production"    # metadata
+bk build create -p my-pipeline -m "Deploy v2.3.1"     # message
+bk build create -p my-pipeline -w                     # open in browser
+```
+
+#### `bk build cancel <build-number>`
+
+```bash
+bk build cancel 123 -p my-pipeline
+```
+
+#### `bk build rebuild [<build-number>]`
+
+```bash
+bk build rebuild 123 -p my-pipeline
+bk build rebuild -b main -p my-pipeline   # most recent on branch
+```
+
+#### `bk build watch [<build-number>]`
+Watch a build's progress in real-time.
+
+```bash
+bk build watch 429 -p my-pipeline
+bk build watch --interval 5 -p my-pipeline
+```
+
+#### `bk build download [<build-number>]`
+Download build resources/artifacts.
+
+```bash
+bk build download 123 -p my-pipeline
+```
+
+### Jobs
+
+#### `bk job log <job-id>`
+Get logs for a specific job. The most important command for debugging failures.
+
+```bash
+bk job log 019c9b53-9ae0-41ab-a55a-73e103cd98aa -p upsells-dd-terraform -b 17025
+
+# Strip timestamps, disable pager, tail for the error
+bk job log <job-id> -p my-pipeline -b 123 --no-timestamps --no-pager 2>&1 | tail -50
+```
+
+Key flags: `-p/--pipeline`, `-b/--build-number` (required), `--no-timestamps`
+
+#### `bk job list`
+
+```bash
+bk job list -p my-pipeline --state failed
+bk job list -p my-pipeline --state running --queue test-queue
+bk job list -p my-pipeline --duration ">10m"
+bk job list -p my-pipeline --since 1h
+bk job list -p my-pipeline --order-by duration
+```
+
+#### `bk job retry <job-id>`
+
+```bash
+bk job retry 019c9b53-9ae0-41ab-a55a-73e103cd98aa
+```
+
+#### `bk job cancel <job-id>`
+
+```bash
+bk job cancel <job-id> -p my-pipeline -b 123
+```
+
+#### `bk job unblock <job-id>`
+
+```bash
+bk job unblock <job-id>
+bk job unblock <job-id> --data '{"field": "value"}'
+```
+
+### Pipelines
+
+```bash
+bk pipeline list                          # all pipelines
+bk pipeline list --name upsells           # partial match, case insensitive
+bk pipeline list --repo upsells-dd-terraform
+bk pipeline list --limit 500
+bk pipeline view upsells-dd-terraform
+bk pipeline view my-org/my-pipeline -o json
+bk pipeline view my-pipeline -w           # open in browser
+```
+
+### Artifacts
+
+```bash
+bk artifacts list 429 -p my-pipeline                    # all artifacts for a build
+bk artifacts list 429 -p my-pipeline --job <job-uuid>   # for a specific job
+bk artifacts download <artifact-id>                     # download by UUID
+```
+
+### Agents
+
+```bash
+bk agent list
+bk agent list --state running          # or: idle
+bk agent list --hostname my-server-01
+bk agent list --tags queue=default --tags os=linux   # AND logic
+bk agent view <agent>
+bk agent pause <agent-id>
+bk agent resume <agent-id>
+bk agent stop [<agents>...]
+```
+
+### Raw API Access
+
+#### `bk api [<endpoint>]`
+Direct API access for endpoints not covered by other commands. Endpoint paths are relative to the org.
+
+```bash
+bk api /pipelines/my-pipeline/builds/420
+bk api --method POST /pipelines --data '{"name": "My Pipeline"}'
+bk api --method PUT /clusters/CLUSTER_UUID --data '{"name": "Updated"}'
+bk api -H "Accept: text/plain" /pipelines/my-pipeline/builds/123/jobs/<id>/log
+bk api --analytics /suites             # Test Engine endpoints
+bk api --file query.graphql            # GraphQL from file
+```
+
+### Other Commands
+
+| Command | Description |
+|---------|-------------|
+| `bk whoami` | Print current user and organization |
+| `bk use [<org>]` | Select an organization |
+| `bk org list` | List configured organizations |
+| `bk config list` / `get` / `set` | Manage configuration values |
+| `bk version` | Print CLI version |
+
+---
+
+## REST API Fallback
+
+Base URL `https://api.buildkite.com/v2`. Most endpoints follow:
 
 ```
 /v2/organizations/{org.slug}/pipelines/{pipeline.slug}/builds/{build.number}/jobs/{job.id}
 ```
 
-- `{org.slug}` -- Organization slug (e.g. `my-org`)
-- `{pipeline.slug}` -- Pipeline slug (e.g. `my-pipeline`)
-- `{build.number}` -- Build number (integer, NOT the UUID)
-- `{job.id}` -- Job UUID
+Use the REST API directly (or via `bk api`) for things the CLI lacks:
 
----
+### Annotations (not in CLI)
 
-## API Reference
-
-### Pipelines
-
-| Operation | Method | Endpoint |
-|-----------|--------|----------|
-| List pipelines | `GET` | `/v2/organizations/{org}/pipelines` |
-| Get a pipeline | `GET` | `/v2/organizations/{org}/pipelines/{pipeline}` |
-
-### Builds
-
-| Operation | Method | Endpoint | Scope |
-|-----------|--------|----------|-------|
-| List all builds | `GET` | `/v2/builds` | `read_builds` |
-| List org builds | `GET` | `/v2/organizations/{org}/builds` | `read_builds` |
-| List pipeline builds | `GET` | `/v2/organizations/{org}/pipelines/{pipeline}/builds` | `read_builds` |
-| Get a build | `GET` | `/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}` | `read_builds` |
-| Create a build | `POST` | `/v2/organizations/{org}/pipelines/{pipeline}/builds` | `write_builds` |
-| Cancel a build | `PUT` | `/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/cancel` | `write_builds` |
-| Rebuild a build | `PUT` | `/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/rebuild` | `write_builds` |
-
-#### Build Query Parameters
-
-Use these on any list-builds endpoint:
-
-| Parameter | Description | Example |
-|-----------|-------------|---------|
-| `state` | Filter by state. Values: `running`, `scheduled`, `passed`, `failing`, `failed`, `blocked`, `canceled`, `canceling`, `skipped`, `not_run`, `finished` (shortcut for passed+failed+blocked+canceled). Supports multiple: `?state[]=failed&state[]=canceled` | `?state=failed` |
-| `branch` | Filter by branch. Supports wildcards: `?branch=*dev*`. Multiple: `?branch[]=main&branch[]=staging` | `?branch=main` |
-| `commit` | Filter by full SHA | `?commit=abc123...` |
-| `created_from` | Builds created on/after (ISO 8601) | `?created_from=2026-01-01T00:00:00Z` |
-| `created_to` | Builds created before (ISO 8601) | `?created_to=2026-02-01T00:00:00Z` |
-| `finished_from` | Builds finished on/after (ISO 8601) | `?finished_from=2026-01-01T00:00:00Z` |
-| `creator` | Filter by user UUID | `?creator=<uuid>` |
-| `meta_data` | Filter by meta-data | `?meta_data[key]=value` |
-| `include_retried_jobs` | Include retried job executions | `?include_retried_jobs=true` |
-
-Pipeline-specific additional params: `exclude_jobs=true`, `exclude_pipeline=true`.
-
-#### Build States
-
-- `creating` -- Build is being created
-- `scheduled` -- Waiting for agents
-- `running` -- Currently running
-- `passed` -- All jobs passed
-- `failing` -- Some jobs have failed, others still running
-- `failed` -- Build finished with failures
-- `blocked` -- Waiting on a block step
-- `canceling` -- Being canceled
-- `canceled` -- Has been canceled
-- `skipped` -- Was skipped
-- `not_run` -- Did not run
-
-#### Build Response Key Fields
-
-```
-id, number, state, blocked, message, commit, branch, source,
-web_url, created_at, started_at, finished_at, jobs[], pipeline{}, creator{}
-```
-
-Each `job` in `jobs[]` includes: `id`, `type`, `name`, `state`, `exit_status`, `command`, `web_url`, `log_url`, `raw_log_url`, `soft_failed`, `started_at`, `finished_at`, `agent{}`, `retried`, `retries_count`.
-
-### Jobs
-
-Base path: `/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/jobs/{job_id}`
-
-| Operation | Method | Path Suffix | Scope |
-|-----------|--------|-------------|-------|
-| Retry a job | `PUT` | `/retry` | `write_builds` |
-| Unblock a job | `PUT` | `/unblock` | `write_builds` |
-| Get job log | `GET` | `/log` | `read_build_logs` |
-| Delete job log | `DELETE` | `/log` | `write_build_logs` |
-| Get job env vars | `GET` | `/env` | `read_job_env` |
-| Reprioritize a job | `PUT` | `/reprioritize` | `write_builds` |
-
-#### Job Log Response (JSON)
-
-```json
-{
-  "url": "https://api.buildkite.com/v2/.../log",
-  "content": "<log output as string>",
-  "size": 12345,
-  "header_times": [1234567890000000000]
-}
-```
-
-Alternative formats via `Accept` header or URL extension:
-- `text/plain` or `.txt` -- Raw log text
-- `text/html` or `.html` -- HTML-rendered log
-
-#### Job Environment Variables Response
-
-```json
-{
-  "env": {
-    "BUILDKITE": "true",
-    "BUILDKITE_BRANCH": "main",
-    "BUILDKITE_BUILD_NUMBER": "42",
-    "BUILDKITE_COMMIT": "abc123...",
-    ...
-  }
-}
-```
-
-#### Job States
-
-`pending`, `waiting`, `scheduled`, `assigned`, `accepted`, `running`, `passed`, `failed`, `timed_out`, `timing_out`, `canceled`, `canceling`, `skipped`, `broken`, `blocked`, `unblocked`, `limited`, `expired`
-
-### Annotations
-
-| Operation | Method | Endpoint | Scope |
-|-----------|--------|----------|-------|
-| List annotations | `GET` | `/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/annotations` | `read_builds` |
-
-Annotations are rich-text messages attached to builds (often contain test failure summaries, deployment info, etc.). Response includes `id`, `context`, `style` (success/info/warning/error), `body_html`, `created_at`.
-
-### Artifacts
-
-| Operation | Method | Endpoint | Scope |
-|-----------|--------|----------|-------|
-| List build artifacts | `GET` | `/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/artifacts` | `read_artifacts` |
-| List job artifacts | `GET` | `/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/jobs/{job_id}/artifacts` | `read_artifacts` |
-| Get an artifact | `GET` | `/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/artifacts/{artifact_id}` | `read_artifacts` |
-| Download an artifact | `GET` | `/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/artifacts/{artifact_id}/download` | `read_artifacts` |
-| Delete an artifact | `DELETE` | `/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/artifacts/{artifact_id}` | `write_artifacts` |
-
-Artifact response includes: `id`, `job_id`, `path`, `filename`, `mime_type`, `file_size`, `sha1sum`, `download_url`, `state`.
-
-### Agents
-
-| Operation | Method | Endpoint |
-|-----------|--------|----------|
-| List agents | `GET` | `/v2/organizations/{org}/agents` |
-| Get an agent | `GET` | `/v2/organizations/{org}/agents/{agent_id}` |
-
----
-
-## Common Workflows
-
-### 1. Investigate a Failed Build
-
-When given a build URL like `https://buildkite.com/{org}/{pipeline}/builds/{number}`:
+Rich-text messages attached to builds — often contain test failure summaries or deployment info.
 
 ```bash
-# Step 1: Get build details
-curl -sS -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  "https://api.buildkite.com/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}" | jq .
-
-# Step 2: Find failed jobs
-curl -sS -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  "https://api.buildkite.com/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}" \
-  | jq '.jobs[] | select(.state == "failed") | {id, name, state, exit_status, web_url}'
-
-# Step 3: Get the log for a failed job
-curl -sS -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  "https://api.buildkite.com/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/jobs/{job_id}/log" \
-  | jq -r '.content'
-
-# Step 4: Check annotations for failure summaries
 curl -sS -H "Authorization: Bearer $BUILDKITE_TOKEN" \
   "https://api.buildkite.com/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/annotations" | jq .
 ```
 
-### 2. Find Recent Failures for a Pipeline
+Response includes `id`, `context`, `style` (success/info/warning/error), `body_html`, `created_at`.
 
-```bash
-# List recent failed builds
-curl -sS -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  "https://api.buildkite.com/v2/organizations/{org}/pipelines/{pipeline}/builds?state=failed&branch=main" \
-  | jq '.[] | {number, state, message, commit, web_url, finished_at}'
-```
-
-### 3. Pull Job Logs as Plain Text
-
-```bash
-# Get raw log text (useful for parsing/searching)
-curl -sS -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  -H "Accept: text/plain" \
-  "https://api.buildkite.com/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/jobs/{job_id}/log"
-```
-
-### 4. Download Build Artifacts
-
-```bash
-# List artifacts for a build
-curl -sS -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  "https://api.buildkite.com/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/artifacts" \
-  | jq '.[] | {id, filename, file_size, path}'
-
-# Download a specific artifact (follow redirect)
-curl -sS -L -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  "https://api.buildkite.com/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/artifacts/{artifact_id}/download" \
-  -o output_file
-```
-
-### 5. Retry a Failed Job
-
-```bash
-curl -sS -X PUT -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  "https://api.buildkite.com/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/jobs/{job_id}/retry"
-```
-
-### 6. Rebuild an Entire Build
-
-```bash
-curl -sS -X PUT -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  "https://api.buildkite.com/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/rebuild"
-```
-
-### 7. Get Job Environment Variables
+### Job Environment Variables (not in CLI)
 
 ```bash
 curl -sS -H "Authorization: Bearer $BUILDKITE_TOKEN" \
@@ -251,63 +266,141 @@ curl -sS -H "Authorization: Bearer $BUILDKITE_TOKEN" \
   | jq '.env'
 ```
 
-### 8. Find Builds by Commit SHA
+### Job Logs (raw)
 
 ```bash
+# JSON (content, size, header_times)
 curl -sS -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  "https://api.buildkite.com/v2/organizations/{org}/pipelines/{pipeline}/builds?commit={full_sha}" \
-  | jq '.[] | {number, state, branch, web_url}'
+  ".../builds/{number}/jobs/{job_id}/log" | jq -r '.content'
+
+# Plain text via Accept header or .txt extension
+curl -sS -H "Authorization: Bearer $BUILDKITE_TOKEN" -H "Accept: text/plain" \
+  ".../builds/{number}/jobs/{job_id}/log"
 ```
 
-### 9. Check Currently Running Builds
+### Build Query Parameters (list endpoints)
 
-```bash
-curl -sS -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  "https://api.buildkite.com/v2/organizations/{org}/builds?state[]=running&state[]=scheduled" \
-  | jq '.[] | {pipeline: .pipeline.slug, number, branch, state, web_url}'
-```
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `state` | `running`, `scheduled`, `passed`, `failing`, `failed`, `blocked`, `canceled`, `canceling`, `skipped`, `not_run`, `finished` (shortcut for passed+failed+blocked+canceled). Multiple: `?state[]=failed&state[]=canceled` | `?state=failed` |
+| `branch` | Supports wildcards `?branch=*dev*` and multiple `?branch[]=main&branch[]=staging` | `?branch=main` |
+| `commit` | Full SHA only | `?commit=abc123...` |
+| `created_from` / `created_to` / `finished_from` | ISO 8601 timestamps | `?created_from=2026-01-01T00:00:00Z` |
+| `creator` | User UUID | `?creator=<uuid>` |
+| `meta_data` | | `?meta_data[key]=value` |
+| `include_retried_jobs` | | `?include_retried_jobs=true` |
 
-### 10. Unblock a Blocked Build
+### Other REST endpoints
 
-```bash
-curl -sS -X PUT -H "Authorization: Bearer $BUILDKITE_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"fields": {"release-name": "v1.2.3"}}' \
-  "https://api.buildkite.com/v2/organizations/{org}/pipelines/{pipeline}/builds/{number}/jobs/{job_id}/unblock"
-```
+| Operation | Method | Endpoint |
+|-----------|--------|----------|
+| Cancel build | `PUT` | `.../builds/{number}/cancel` |
+| Rebuild | `PUT` | `.../builds/{number}/rebuild` |
+| Retry job | `PUT` | `.../jobs/{job_id}/retry` |
+| Unblock job | `PUT` | `.../jobs/{job_id}/unblock` (body: `{"fields": {...}}`) |
+| Reprioritize job | `PUT` | `.../jobs/{job_id}/reprioritize` |
+| List/download artifacts | `GET` | `.../builds/{number}/artifacts` / `.../artifacts/{id}/download` (follow redirect with `-L`) |
+
+REST notes:
+- All list endpoints are **paginated**; check `Link` response headers.
+- Rate limits apply; check response headers.
 
 ---
 
-## Debugging Workflow
+## Common Debugging Workflows
 
-When a user reports a build failure, follow this sequence:
+### 1. Investigate a Failed Build
 
-1. **Get the build** -- Fetch the build by org/pipeline/number to see overall state
-2. **Identify failed jobs** -- Filter `jobs[]` for `state == "failed"` or `state == "timed_out"`
-3. **Read job logs** -- Pull log content for each failed job; search for error messages, stack traces, assertion failures
-4. **Check annotations** -- Annotations often contain rendered test failure summaries or deployment status
-5. **Check artifacts** -- Test result files (JUnit XML, coverage reports) may be uploaded as artifacts
-6. **Check environment** -- If the failure seems environment-related, pull the job's env vars
-7. **Check exit status** -- `exit_status` on the job indicates the process exit code (non-zero = failure)
-8. **Look for patterns** -- Compare with recent builds on the same branch to identify flaky tests vs. real regressions
-9. **Retry or rebuild** -- Retry individual failed jobs or rebuild the entire build if appropriate
+```bash
+# Step 1: View the build to see overall state and failed jobs
+bk build view <number> -p <pipeline> -o json
 
-## Parsing Build URLs
+# Step 2: Get the failed job's logs (last 50 lines usually have the error)
+bk job log <job-id> -p <pipeline> -b <number> --no-timestamps --no-pager 2>&1 | tail -50
 
-Given a Buildkite URL like `https://buildkite.com/my-org/my-pipeline/builds/123`:
-- `org.slug` = `my-org`
-- `pipeline.slug` = `my-pipeline`
-- `build.number` = `123`
+# Step 3: Search logs for errors
+bk job log <job-id> -p <pipeline> -b <number> --no-timestamps --no-pager 2>&1 | grep -i "error\|failed\|fatal"
 
-Given a job URL like `https://buildkite.com/my-org/my-pipeline/builds/123#step-uuid`:
-- The fragment after `#` is a UI anchor, not the job UUID
-- Fetch the build first, then find the job by name or step key in the `jobs[]` array
+# Step 4: Check annotations for failure summaries (REST)
+curl -sS -H "Authorization: Bearer $BUILDKITE_TOKEN" \
+  "https://api.buildkite.com/v2/organizations/rokt/pipelines/<pipeline>/builds/<number>/annotations" | jq .
 
-## Notes
+# Step 5: Check artifacts for test results
+bk artifacts list <number> -p <pipeline>
 
-- All list endpoints return **paginated** results. Check `Link` response headers for next/prev pages.
+# Step 6: Retry the failed job if it looks flaky
+bk job retry <job-id>
+```
+
+### 2. Find Recent Failures
+
+```bash
+bk build list -p <pipeline> --state failed --since 24h
+bk build list -p <pipeline> --state failed --branch main --since 7d
+```
+
+### 3. Monitor a Build in Progress
+
+```bash
+bk build watch <number> -p <pipeline>
+```
+
+### 4. Trigger a New Build
+
+```bash
+bk build create -p <pipeline> -b main -m "Triggered from CLI"
+```
+
+### 5. Bulk Operations with JSON Output
+
+```bash
+# Get all failed job IDs
+bk job list -p <pipeline> --state failed --since 1h -o json | jq '.[].id'
+
+# Retry all failed jobs (careful!)
+bk job list -p <pipeline> --state failed --since 1h -o json \
+  | jq -r '.[].id' \
+  | xargs -I {} bk job retry {}
+```
+
+### General failure-diagnosis sequence
+
+1. **Get the build** — overall state, identify jobs with `state == "failed"` or `timed_out`
+2. **Read job logs** — search for errors, stack traces, assertion failures
+3. **Check annotations** — often contain rendered test failure summaries
+4. **Check artifacts** — JUnit XML, coverage reports
+5. **Check env vars** — if the failure seems environment-related
+6. **Check exit status** — non-zero `exit_status` on the job = failure
+7. **Look for patterns** — compare recent builds on the same branch (flaky vs. regression)
+8. **Retry or rebuild** as appropriate
+
+---
+
+## Build States
+
+| State | Description |
+|-------|-------------|
+| `creating` | Build is being created |
+| `scheduled` | Waiting for agents |
+| `running` | Currently executing |
+| `passed` | All jobs passed |
+| `failing` | Some jobs failed, others still running |
+| `failed` | Build finished with failures |
+| `blocked` | Waiting on a block step (`state` retains last value, `blocked: true`) |
+| `canceling` / `canceled` | Being / has been canceled |
+| `skipped` | Was skipped |
+| `not_run` | Did not run |
+
+## Job States
+
+`pending`, `waiting`, `scheduled`, `assigned`, `accepted`, `running`, `passed`, `failed`, `timed_out`, `timing_out`, `canceled`, `canceling`, `skipped`, `broken`, `blocked`, `unblocked`, `limited`, `expired`
+
+## Tips
+
+- Always use `--no-pager` when piping output or capturing in scripts.
+- Use `-o json` for machine-readable output; pipe through `jq` for filtering.
+- The `-p` flag accepts `{pipeline-slug}` or `{org}/{pipeline-slug}` format.
+- `bk build view` without a number resolves the most recent build on the current branch (requires being in a git repo with a configured pipeline).
+- For large logs, pipe `bk job log` through `tail`, `grep`, or redirect to a file.
+- `bk build list` fetches 50 builds by default; use `--limit` to increase or `--no-limit` for all.
 - Build `number` is an integer unique within a pipeline (not the UUID `id`).
-- The `finished` state filter is a shortcut for `passed`, `failed`, `blocked`, `canceled`.
-- When a build is blocked, `state` retains its last value and `blocked` is `true`.
-- Rate limits apply; check response headers for rate limit status.
-- Token scopes needed: `read_builds`, `read_build_logs`, `read_artifacts`, `read_job_env`, `write_builds` (for mutations).
