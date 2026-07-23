@@ -20,6 +20,8 @@ export PATH="$PATH:$HOME/scripts"
 export PATH="$PATH:$HOME/work-scripts"
 export PATH="$PATH:$HOME/go/bin:$HOME/bin"
 export PATH="$HOME/.local/bin:$PATH"
+# temp as we test out akhq-cli
+export PATH="$PATH:$HOME/go/src/github.com/ROKT/dpt/clis/akhq-cli/bin"
 
 export PATH="$HOME/.npm-global/bin:$PATH"
 
