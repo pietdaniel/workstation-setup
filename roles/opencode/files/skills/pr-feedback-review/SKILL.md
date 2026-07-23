@@ -1,13 +1,25 @@
 ---
 name: pr-feedback-review
-description: "Pull down all feedback from a GitHub PR and conduct a thorough analysis. For each piece of feedback, provide a summary and your assessment. Takes a PR URL or 'owner/repo#number' as input (e.g. 'https://github.com/ROKT/kube-configs/pull/2209' or 'ROKT/kube-configs#2209'). Use when asked to review, analyze, or respond to PR feedback."
+description: "Pull down all feedback from a GitHub PR, analyze each item, REPLY to every comment on the PR with your reasoning, APPLY the warranted code changes, and PUSH the result. Takes a PR URL or 'owner/repo#number' as input (e.g. 'https://github.com/ROKT/kube-configs/pull/2209' or 'ROKT/kube-configs#2209'). Use when asked to review, analyze, respond to, or address PR feedback."
 ---
 
 # PR Feedback Review
 
 ## Overview
 
-Analyze all feedback on a GitHub Pull Request: reviews, inline review comments, and general issue comments. For each piece of feedback, provide a concise summary and a technically grounded assessment.
+Given a GitHub Pull Request, run the full feedback loop end-to-end:
+
+1. Fetch all feedback (reviews, inline review comments, general comments).
+2. Analyze each item — read the actual code, decide valid / invalid / etc.
+3. **Reply on the PR to every substantive comment** with your thought
+   process (accept + what you changed, or push back + why).
+4. **Apply the warranted code changes** locally and validate them.
+5. **Commit and push** so the PR is updated.
+6. Report a summary back to the user.
+
+This is NOT a read-only analysis. The default expectation is that you leave
+a reply on every comment, make the changes that should be made, and push the
+result. Do not stop at a written report.
 
 ## Input
 
@@ -26,96 +38,163 @@ Extract `owner`, `repo`, and `pr_number` from the input.
 
 ## Step 2 — Fetch all PR data (parallel)
 
-Run ALL of the following `gh` commands in parallel:
+Run ALL of the following `gh` commands in parallel. Capture the numeric
+`id` of every review comment and issue comment — you need those IDs to post
+threaded replies in Step 5.
 
 ```bash
-# PR metadata (title, body, author, state, files changed)
+# PR metadata (title, body, author, state, files changed, head branch)
 gh pr view {number} --repo {owner}/{repo} --json title,body,state,author,files,additions,deletions,baseRefName,headRefName
 
 # Reviews (approvals, change requests, comments with body text)
 gh api repos/{owner}/{repo}/pulls/{number}/reviews --paginate
 
-# Inline review comments (code-level feedback with diff context)
+# Inline review comments (code-level feedback with diff context) — note each .id
 gh api repos/{owner}/{repo}/pulls/{number}/comments --paginate
 
-# General PR comments (conversation-level)
+# General PR comments (conversation-level) — note each .id
 gh api repos/{owner}/{repo}/issues/{number}/comments --paginate
+```
+
+Also confirm the local checkout is on the PR's head branch (or check it out)
+before making changes in Step 4:
+
+```bash
+git fetch origin {headRefName} && git checkout {headRefName}
 ```
 
 ## Step 3 — Filter to substantive feedback
 
-Discard noise:
-- Bot comments that are purely informational (e.g. CI status, "Codex has been enabled" boilerplate)
+Discard pure noise (do NOT reply to these):
+- CI/status boilerplate, "bot enabled" notices, security-scan "0 findings"
+- Auto-generated walkthroughs / file-summary tables with no actionable ask
 - Empty review bodies with no inline comments
-- Duplicate comments (same user, same content)
+- Exact-duplicate comments (same user, same content)
 
-Keep:
-- Any review comment with a non-empty `body` that contains actionable feedback
-- Inline review comments (these are always substantive)
-- General comments that ask questions, raise concerns, or request changes
-- Bot comments that contain specific code suggestions or bug reports (e.g. Codex P1/P2 findings)
+Keep (these each get analysis AND a reply):
+- Any review comment whose `body` contains actionable feedback
+- Every inline review comment
+- General comments that ask a question, raise a concern, or request a change
+- Bot comments with a specific code suggestion or bug report (Copilot,
+  Devin, CodeRabbit, Codex P1/P2, etc.) — do not dismiss bots; they find
+  real bugs
 
-## Step 4 — For each piece of feedback, analyze
+## Step 4 — For each item: analyze, then act
 
-For each substantive feedback item:
+Work item by item. For each substantive item:
 
 ### 4a. Read the relevant code
-
-If the comment references a specific file/line (inline review comment):
-- Read the file at the referenced lines (with surrounding context, ~30 lines)
-- Understand the diff hunk the comment is attached to
-
-If the comment references a function/concept:
-- Use grep/glob to find the relevant code
-- Read enough context to understand the concern
+- Inline comment → read the referenced file at the given lines (~30 lines of
+  context) and understand the diff hunk.
+- Concept/function reference → grep/glob to find it and read enough context.
 
 ### 4b. Validate the feedback
+Classify it:
+- **Valid** — technically correct, should be fixed.
+- **Partially valid** — has merit but overstated or caveated.
+- **Invalid** — incorrect given actual code behavior.
+- **Stylistic** — not a bug, reasonable preference.
+- **Out of scope** — valid but unrelated to this PR.
 
-Determine if the feedback is:
-- **Valid** — The concern is technically correct and should be addressed
-- **Partially valid** — The concern has merit but is overstated or has caveats
-- **Invalid** — The concern is incorrect based on the actual code behavior
-- **Stylistic** — Not a bug, but a reasonable style/preference suggestion
-- **Out of scope** — Valid concern but not related to this PR's changes
+If a reviewer proposed a fix, evaluate whether that fix is itself correct
+before adopting it. Watch for **stale** bot comments that reference an older
+commit than the current head — verify against current code.
 
-### 4c. Produce the analysis
+### 4c. Apply the change (when warranted)
+- **Valid / Partially valid (agreed portion):** make the code change now.
+- **Stylistic:** apply if cheap and consistent with the repo pattern;
+  otherwise skip and explain in the reply.
+- **Invalid / Out of scope:** make NO change; you will push back in the reply.
 
-For each feedback item, output:
+Keep edits surgical — every changed line must trace to a specific comment.
+Record, per item, exactly what you changed (files/lines) so the reply and
+commit message can reference it.
 
+## Step 5 — Validate, commit, and push the changes
+
+If any code changed:
+
+1. Run the repo's validation for the changed files (e.g. `terraform fmt` +
+   `terraform validate`, `go build`/`go test`, linters). Fix failures before
+   pushing.
+2. Inspect `git status --porcelain` and stage ONLY the intended paths
+   (never `git add -A`). Confirm no stray/session files ride along.
+3. Commit with a message that summarizes the review-driven changes, e.g.
+   `chore(<area>): address PR review feedback` with a short bulleted body.
+4. `git push` to update the PR. Capture the new commit SHA.
+
+If nothing changed (all items invalid/out-of-scope/acknowledge-only), skip
+the commit but still post replies in Step 6.
+
+## Step 6 — Reply to EVERY substantive comment
+
+Post a reply to each item from Step 3 documenting your thought process.
+This is mandatory — every kept comment gets a response, whether you accepted
+it or not.
+
+Each reply states: (1) your assessment, (2) the reasoning, and (3) the
+outcome — what you changed (reference the commit SHA) or why you did not.
+Keep it concise and professional. For a fixed item, cite the commit; for a
+push-back, give the evidence.
+
+**Threaded reply to an inline review comment** (preferred — keeps it on the
+thread), using the comment `id` captured in Step 2:
+
+```bash
+gh api --method POST \
+  repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies \
+  -f body="Assessment: <valid|partially valid|invalid|...>. <reasoning>. <what changed + SHA, or why not>."
 ```
-## Feedback #{n} — {reviewer_name} ({priority_if_any})
 
-**Location:** {file}:{line} (or "General comment")
-**Summary:** {1-2 sentence summary of what the reviewer is saying}
-**Assessment:** {Valid | Partially valid | Invalid | Stylistic | Out of scope}
-**Analysis:** {Your technical reasoning — reference specific lines, variable values, control flow}
-**Recommended action:** {What to do — fix, acknowledge, push back, or ignore}
+**Reply to a review-level or general/issue comment** (no inline thread) —
+post a PR-level comment that names the reviewer and references the point:
+
+```bash
+gh pr comment {number} --repo {owner}/{repo} \
+  --body "@<reviewer> re: <topic> — <assessment + reasoning + outcome/SHA>."
 ```
 
-## Step 5 — Produce final report
+Guidance for replies:
+- Accepted → "Good catch — fixed in `<sha>`: <one-line what/why>."
+- Partially → "Valid re X; the stated impact isn't accurate because <reason>.
+  Aligned anyway in `<sha>` for <benefit>."
+- Push back → "Not changing this: <evidence from the code>."
+- Stylistic skip → "Reasonable, but skipping to stay consistent with
+  <sibling pattern>; can do repo-wide separately."
+- Stale bot comment → note it targeted an earlier commit and state current
+  state.
 
-Output all analyzed feedback items in order of severity:
-1. Valid bugs / issues first
-2. Partially valid concerns
-3. Stylistic suggestions
-4. Invalid / out of scope items
+## Step 7 — Final report to the user
 
-End with a summary:
+Summarize what you did:
+
 ```
 ## Summary
 - **Total feedback items:** {n}
-- **Valid (should fix):** {n}
-- **Partially valid (consider):** {n}
-- **Invalid / out of scope:** {n}
-- **Recommended next steps:** {list of concrete actions}
+- **Fixed:** {n}  (commit {sha})
+- **Acknowledged / no change:** {n}
+- **Pushed back (invalid/out of scope):** {n}
+- **Replies posted:** {n}
+- **Validation:** {fmt/validate/test results}
 ```
+
+List each item briefly with its outcome and a link/anchor if useful.
 
 ## Important Rules
 
-- ALWAYS read the actual code before assessing feedback — never guess
-- When feedback references bash/shell, pay special attention to variable scoping (local vs global, subshells, special variables like `SECONDS`, `PIPESTATUS`)
-- When feedback references YAML, validate structure and indentation
-- If a reviewer suggests a fix, evaluate whether the suggested fix is itself correct
-- Be direct — if the reviewer is wrong, say so with evidence
-- Be fair — if the reviewer found a real bug, acknowledge it clearly
-- Do NOT dismiss bot feedback automatically — bots can find real bugs
+- This skill ENDS with replies posted and (if warranted) changes pushed —
+  not with a written analysis. Do not stop early.
+- Reply to every substantive comment, including bots, so there is an audit
+  trail of the decision.
+- ALWAYS read the actual code before assessing — never guess.
+- Verify bot comments against the CURRENT head commit; they are often stale.
+- When feedback references bash/shell, watch variable scoping (local vs
+  global, subshells, special vars like `SECONDS`, `PIPESTATUS`).
+- When feedback references YAML/HCL, validate structure and indentation.
+- If a reviewer suggests a fix, verify the fix is itself correct before
+  adopting it.
+- Be direct — if the reviewer is wrong, say so with evidence in the reply.
+- Be fair — if the reviewer found a real bug, acknowledge it and fix it.
+- Never `git add -A` / `git commit -a`; stage explicit paths and verify with
+  `git status` / `git show --stat` that only intended files are included.
+- Run the repo's validation before pushing; fix failures first.
