@@ -11,6 +11,6 @@ Once all feedback has been addressed, commit and push the changes. Then respond 
 - For feedback you acted on, reply with a summary of what you changed.
 - For feedback you chose not to act on, reply explaining why no change was needed.
 
-After pushing and responding, load the "fix-ci" skill and follow its instructions to check CI status. If there are any failures, diagnose and fix them, push again, and repeat until CI is green.
+After pushing and responding, check CI status. If there are any failures, diagnose and fix them, push again, and repeat until CI is green.
 
 $ARGUMENTS
