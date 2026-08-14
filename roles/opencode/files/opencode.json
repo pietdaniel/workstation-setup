@@ -8,59 +8,11 @@
     "list": "allow",
     "external_directory": {
       "*": "ask",
-      "~/ROKT/**": "allow",
-      "/Users/rokt/ROKT/**": "allow",
-      "~/go/src/github.com/ROKT/**": "allow",
       "~/go/**": "allow",
-      "/Users/rokt/go/src/github.com/ROKT/**": "allow",
       "/tmp/**": "allow",
       "/private/tmp/**": "allow",
       "/var/folders/*/*/T/*/**": "allow",
-      "/Users/rokt/.config/opencode/**": "allow"
-    }
-  },
-  "mcp": {
-    "brain-code-guru": {
-      "type": "remote",
-      "url": "https://brain-code-guru.roktinternal.com/mcp",
-      "enabled": false
-    },
-    "rokt-code-guru": {
-      "type": "remote",
-      "url": "https://code-guru.roktinternal.com/mcp",
-      "enabled": true
-    },
-    "datadog": {
-      "type": "remote",
-      "url": "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp",
-      "enabled": false
-    },
-    "github": {
-      "type": "remote",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "enabled": false,
-      "oauth": false,
-      "headers": {
-        "Authorization": "Bearer ${env:GITHUB_TOKEN}",
-        "User-Agent": "vscode-mcp-client/1.0",
-        "MCP-Protocol-Version": "2.0"
-      }
-    },
-    "buildkite": {
-      "type": "remote",
-      "url": "https://mcp.buildkite.com/mcp",
-      "enabled": false
-    },
-    "mcp.excalidraw.com": {
-      "type": "remote",
-      "url": "https://mcp.excalidraw.com",
-      "enabled": false,
-      "oauth": {}
-    },
-    "mcpgateway-prod": {
-      "type": "remote",
-      "url": "https://mcpgateway-eng-eks-us-west-2.eng.roktinternal.com/mcp",
-      "enabled": false
+      "/Users/*/.config/opencode/**": "allow"
     }
   },
   "plugin": [
