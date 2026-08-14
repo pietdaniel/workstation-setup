@@ -43,6 +43,7 @@
     - docker-compose
     - yarn
     - npm
+    - tree-sitter-cli
     - trunk-io
     - buf
     # databases
