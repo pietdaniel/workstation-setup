@@ -20,8 +20,6 @@ export PATH="$PATH:$HOME/scripts"
 export PATH="$PATH:$HOME/work-scripts"
 export PATH="$PATH:$HOME/go/bin:$HOME/bin"
 export PATH="$HOME/.local/bin:$PATH"
-# temp as we test out akhq-cli
-export PATH="$PATH:$HOME/go/src/github.com/ROKT/dpt/clis/akhq-cli/bin"
 
 export PATH="$HOME/.npm-global/bin:$PATH"
 
@@ -294,22 +292,6 @@ function notes() {
     fi
 }
 
-# ===========================================
-# ROKT Specifics
-# ===========================================
-export PATH="$PATH:$HOME/ROKT/my-rokt-jwt/bin"
-
-# Quickly fuzzy find projects
-cdr () {
-    A_DIRECTORY=`ls ~/ROKT | fzf`
-    cdls ~/ROKT/$A_DIRECTORY
-}
-
-# Claude/AI configuration
-export CLAUDE_CODE_USE_BEDROCK=1
-export AWS_REGION=us-west-2
-alias rokt-ai="aws-vault exec rokt-ai --"
-
 # Custom project paths
 export PATH="$PATH:$HOME/go/src/github.com/pietdaniel/tq/bin"
 alias cdtq="cd $HOME/go/src/github.com/pietdaniel/tq"
@@ -345,10 +327,3 @@ fi
 # ===========================================
 
 alias tf=terraform
-
-# bun completions
-[ -s "/Users/rokt/.bun/_bun" ] && source "/Users/rokt/.bun/_bun"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
