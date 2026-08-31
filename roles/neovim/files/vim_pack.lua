@@ -66,6 +66,20 @@ vim.pack.add({
 
 -- setup java
 require("java").setup()
+
+vim.lsp.config("jdtls", {
+  settings = {
+    java = {
+      eclipse = {
+        downloadSources = true,
+      },
+      maven = {
+        downloadSources = true,
+      },
+    },
+  },
+})
+
 vim.lsp.enable("jdtls")
 
 -- no idea what this is
