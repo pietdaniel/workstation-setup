@@ -17,6 +17,7 @@
       tags: k8s
     - git
     - shell
-    - neovim
+    - role: neovim
+      tags: neovim
     - role: opencode
       tags: opencode
