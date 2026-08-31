@@ -99,7 +99,7 @@ else
 
   event_type="$(jq -r '.type // .hook_event_name // .hookEventName // "notification"' <<< "$payload")"
   cwd="$(jq -r '.cwd // ""' <<< "$payload")"
-  body="$(jq -r '."last-assistant-message" // .message // empty' <<< "$payload")"
+  body="$(jq -r '."last-assistant-message" // .message // .reason // empty' <<< "$payload")"
 
   [[ -n "$body" ]] || body="$payload"
 
@@ -119,9 +119,12 @@ else
         status="$event_type"
       fi
       ;;
-    *question*|*input*|*approval*)
+    PermissionRequest|*question*|*input*|*approval*)
       notification_category="questions"
       status="Question"
+      if [[ "$event_type" == "PermissionRequest" ]]; then
+        body="$(jq -r '.reason // .message // "Codex is requesting permission."' <<< "$payload")"
+      fi
       ;;
     agent-turn-complete)
       if [[ "$body" =~ \?[[:space:]]*$ ]]; then
