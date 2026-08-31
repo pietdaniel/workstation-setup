@@ -95,6 +95,7 @@ $directory\
 $git_branch\
 $git_state\
 $git_status\
+$nix_shell\
 $cmd_duration\
 $python\
 $line_break\
@@ -130,6 +131,11 @@ style = "bright-black"
 [cmd_duration]
 format = "[$duration]($style) "
 style = "yellow"
+
+[nix_shell]
+format = "[$symbol$name]($style) "
+symbol = " "
+style = "bold blue"
 
 [python]
 format = "[$virtualenv]($style) "
