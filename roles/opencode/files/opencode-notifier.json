@@ -1,0 +1,21 @@
+{
+  "sound": false,
+  "notification": false,
+  "command": {
+    "enabled": true,
+    "path": "/Users/piet/scripts/notifier/opencode-notifier.sh",
+    "args": ["{event}", "{message}", "{projectName}"]
+  },
+  "events": {
+    "permission": { "command": true },
+    "complete": { "command": true },
+    "subagent_complete": { "command": true },
+    "error": { "command": true },
+    "question": { "command": true },
+    "plan_exit": { "command": true },
+    "user_cancelled": { "command": false },
+    "session_started": { "command": false },
+    "user_message": { "command": false },
+    "client_connected": { "command": false }
+  }
+}

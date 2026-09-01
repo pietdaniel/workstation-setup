@@ -24,6 +24,13 @@
     state: link
     force: yes
 
+- name: Symlink opencode notifier config
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/opencode-notifier.json"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/opencode/opencode-notifier.json"
+    state: link
+    force: yes
+
 # Skills directory symlink
 - name: Check if skills directory exists and is not a symlink
   ansible.builtin.stat:

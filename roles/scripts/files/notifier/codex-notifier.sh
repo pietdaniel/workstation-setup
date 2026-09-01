@@ -4,7 +4,7 @@ DEBUG=true
 
 set -u
 
-LOG_DIR="/tmp/codex-notifier-debug"
+LOG_DIR="/tmp/notifier-debug"
 DEFAULT_SOUND_FILE="/System/Library/Sounds/Glass.aiff"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 ENABLED_SOUND_ROOT="$SCRIPT_DIR/sounds/enabled"
