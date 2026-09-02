@@ -86,6 +86,22 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+vim.filetype.add({
+  extension = {
+    kts = "kotlin",
+  },
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "kotlin",
+  callback = function()
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.expandtab = true
+    vim.opt_local.tabstop = 4
+    vim.opt_local.softtabstop = 4
+  end,
+})
+
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "python",
   callback = function(event)
@@ -127,6 +143,7 @@ require("mason-lspconfig").setup({
     "ts_ls",
     "lua_ls",
     "gopls",
+    "kotlin_language_server",
   },
   handlers = {
     lsp_zero.default_setup,
@@ -149,6 +166,71 @@ vim.lsp.config('ty', {
 
 -- Required: Enable the language server
 vim.lsp.enable('ty')
+
+vim.lsp.config("kotlin_language_server", {
+  root_markers = {
+    "settings.gradle.kts",
+    "settings.gradle",
+    "build.gradle.kts",
+    "build.gradle",
+    ".git",
+  },
+})
+vim.lsp.enable("kotlin_language_server")
+
+local gradle_root_markers = {
+  "settings.gradle.kts",
+  "settings.gradle",
+  "build.gradle.kts",
+  "build.gradle",
+}
+
+local function run_gradle_task(task)
+  local root = vim.fs.root(0, gradle_root_markers)
+  if not root then
+    vim.notify("No Gradle project found for the current buffer", vim.log.levels.ERROR)
+    return
+  end
+
+  local wrapper = root .. "/gradlew"
+  if vim.fn.executable(wrapper) == 0 then
+    vim.notify("Gradle wrapper is not executable: " .. wrapper, vim.log.levels.ERROR)
+    return
+  end
+
+  vim.notify("Running Gradle task: " .. task)
+  vim.system({ wrapper, task }, { cwd = root, text = true }, function(result)
+    vim.schedule(function()
+      local output = vim.split((result.stdout or "") .. "\n" .. (result.stderr or ""), "\n", {
+        plain = true,
+        trimempty = true,
+      })
+      vim.fn.setqflist({}, " ", { title = "Gradle " .. task, lines = output })
+      vim.cmd("copen")
+
+      local level = result.code == 0 and vim.log.levels.INFO or vim.log.levels.ERROR
+      vim.notify("Gradle " .. task .. " exited with code " .. result.code, level)
+    end)
+  end)
+end
+
+vim.api.nvim_create_user_command("AndroidBuild", function()
+  run_gradle_task("assembleDebug")
+end, {})
+vim.api.nvim_create_user_command("AndroidTest", function()
+  run_gradle_task("testDebugUnitTest")
+end, {})
+vim.api.nvim_create_user_command("AndroidLint", function()
+  run_gradle_task("lint")
+end, {})
+vim.api.nvim_create_user_command("AndroidConnectedTest", function()
+  run_gradle_task("connectedDebugAndroidTest")
+end, {})
+
+vim.keymap.set("n", "<leader>ab", "<cmd>AndroidBuild<CR>", { desc = "Android build" })
+vim.keymap.set("n", "<leader>at", "<cmd>AndroidTest<CR>", { desc = "Android unit tests" })
+vim.keymap.set("n", "<leader>al", "<cmd>AndroidLint<CR>", { desc = "Android lint" })
+vim.keymap.set("n", "<leader>ac", "<cmd>AndroidConnectedTest<CR>", { desc = "Android device tests" })
 
 --- LSP Format
 local format_group = vim.api.nvim_create_augroup("FormatOnSave", { clear = true })
@@ -258,7 +340,7 @@ if ts_ok then
   ts_configs.setup {
     ensure_installed = {
       "c", "lua", "vim", "vimdoc", "query",
-      "javascript", "python", "go", "c_sharp",
+      "javascript", "python", "go", "c_sharp", "kotlin",
     },
     sync_install = false,
     auto_install = true,
@@ -273,7 +355,7 @@ else
   vim.treesitter.start = vim.treesitter.start or function() end
   require('nvim-treesitter').setup {}
   -- Install parsers if missing
-  local parsers = { "c", "lua", "vim", "vimdoc", "query", "javascript", "python", "go", "c_sharp" }
+  local parsers = { "c", "lua", "vim", "vimdoc", "query", "javascript", "python", "go", "c_sharp", "kotlin" }
   local installed = require('nvim-treesitter').get_installed()
   local installed_set = {}
   for _, p in ipairs(installed) do installed_set[p] = true end
