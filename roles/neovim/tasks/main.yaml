@@ -13,7 +13,17 @@
 - name: Symlink neovim dotfiles
   ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/symlink_dotfiles.yaml"
 
+- name: Remove legacy Vimscript Neovim configuration
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/nvim/init.vim"
+    state: absent
+
 - name: Remove obsolete Packer installation
   ansible.builtin.file:
     path: "{{ ansible_facts['env']['HOME'] }}/.local/share/nvim/site/pack/packer/start/packer.nvim"
+    state: absent
+
+- name: Remove generated Packer configuration
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/nvim/plugin/packer_compiled.lua"
     state: absent

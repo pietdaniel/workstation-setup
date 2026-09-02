@@ -1,5 +1,105 @@
 require("config.vim_pack")
 
+vim.opt.smartindent = true
+vim.opt.number = true
+vim.opt.tabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.expandtab = true
+vim.opt.colorcolumn = "120"
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+vim.g.re = 1
+vim.opt.lazyredraw = true
+vim.opt.showbreak = "¬"
+vim.opt.list = true
+vim.opt.listchars = "tab:»\\ ,extends:›,precedes:‹,nbsp:·,trail:·"
+vim.opt.foldenable = false
+vim.opt.hlsearch = false
+vim.opt.relativenumber = true
+vim.opt.mouse = "a"
+vim.opt.backspace = { "indent", "eol", "start" }
+vim.opt.scrolloff = 2
+vim.opt.laststatus = 2
+vim.opt.showmode = false
+vim.opt.hidden = true
+vim.opt.backup = false
+vim.opt.writebackup = false
+vim.opt.cmdheight = 2
+vim.opt.updatetime = 300
+vim.opt.shortmess:append("c")
+
+vim.keymap.set("n", ";", ":")
+vim.keymap.set("n", "<C-e>", "<C-e>j")
+vim.keymap.set("n", "<C-y>", "<C-y>k")
+vim.keymap.set("x", "<leader>9", ":s/\\(.\\{80\\}.\\{-}\\s\\)/\\1\\r/g<CR>:StripWhitespace<CR>")
+vim.keymap.set("n", "<leader>p", ":set invpaste<CR>")
+vim.keymap.set("n", "<leader>z", ":%!jq '.'<CR>")
+vim.keymap.set("x", "<leader>x", "+y")
+vim.keymap.set("n", "<leader>x", ":set cursorline! cursorcolumn!<CR>")
+vim.keymap.set("x", "//", "y/<C-R>\"<CR>")
+vim.keymap.set({ "n", "v" }, "Q", "<Nop>")
+vim.keymap.set("n", "<C-b>", ":cprevious<CR>")
+vim.keymap.set("n", "<C-n>", ":cnext<CR>")
+vim.keymap.set("n", "I", "yiw:Ack '<C-r>\"'<CR>")
+vim.keymap.set("n", "<leader>]", ":lne<CR>")
+vim.keymap.set("n", "<C-S-K>", ":let @r =strftime('- %c - ')<CR>:normal! \"rp<CR>a")
+vim.keymap.set("i", "<C-S-K>", "<ESC>:let @r = strftime('- %c - ')<CR>:normal! \"rp<CR>a")
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "markdown",
+  callback = function()
+    vim.keymap.set("n", "<C-S-K>", ":let @r =strftime('# %c -')<CR>:normal! \"rP<CR>li<CR><CR><CR><CR><ESC>kki", { buffer = true })
+    vim.keymap.set("i", "<C-S-K>", "<ESC>:let @r = strftime('# %c -')<CR>:normal! \"rP<CR>li<CR><CR><CR><CR><ESC>kki", { buffer = true })
+  end,
+})
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "[:;'\"`]*",
+  callback = function()
+    error("Forbidden file name: " .. vim.fn.expand("<afile>"))
+  end,
+})
+
+vim.api.nvim_create_autocmd({ "BufReadPost", "FileReadPost", "BufNewFile" }, {
+  pattern = "*",
+  callback = function()
+    vim.fn.system({ "tmux", "rename-window", vim.fn.expand("%") })
+  end,
+})
+
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = "*.zsh-theme",
+  callback = function()
+    vim.bo.syntax = "zsh"
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "ruby", "sh", "bash", "zsh", "javascript", "text", "markdown", "yaml", "yml" },
+  callback = function()
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.expandtab = true
+    vim.opt_local.tabstop = 2
+    vim.opt_local.softtabstop = 2
+    vim.opt_local.smartindent = true
+    vim.opt_local.autoindent = true
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "python",
+  callback = function(event)
+    vim.keymap.set("n", "<leader><leader>p", "koimport ipdb; ipdb.set_trace()<esc>", { buffer = event.buf })
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "javascript", "typescript" },
+  callback = function(event)
+    vim.keymap.set("n", "<leader><leader>p", "kodebugger;<esc>", { buffer = event.buf })
+  end,
+})
+
 --- Obsidian Config
 vim.api.nvim_set_keymap('n', '<Leader>on', ':ObsidianDailies<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<Leader>os', ':ObsidianSearch<CR>', { noremap = true, silent = true })
@@ -51,6 +151,8 @@ vim.lsp.config('ty', {
 vim.lsp.enable('ty')
 
 --- LSP Format
+local format_group = vim.api.nvim_create_augroup("FormatOnSave", { clear = true })
+
 vim.api.nvim_create_autocmd({ "BufWritePost" }, {
     pattern = { "*.py" },
     desc = "Auto-format Python files after saving",
@@ -59,7 +161,7 @@ vim.api.nvim_create_autocmd({ "BufWritePost" }, {
         vim.cmd(":silent !black --preview -q -l 120 " .. fileName)
         vim.cmd(":silent !isort --profile black --float-to-top -q " .. fileName)
     end,
-    group = autocmd_group,
+    group = format_group,
 })
 
 vim.api.nvim_create_autocmd("BufWritePre", {
@@ -285,3 +387,21 @@ vim.lsp.config('helm_ls', {
   },
 })
 vim.lsp.enable('helm_ls')
+
+vim.g.NERDTreeShowHidden = 1
+vim.keymap.set("n", "<leader>n", ":NERDTreeToggle<CR>")
+vim.g.delimitMate_expand_cr = 1
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "python",
+  callback = function()
+    vim.b.delimitMate_nesting_quotes = { '"' }
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "markdown",
+  callback = function()
+    vim.b.delimitMate_nesting_quotes = { "`" }
+  end,
+})

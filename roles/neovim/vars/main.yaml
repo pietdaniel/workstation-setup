@@ -1,6 +1,6 @@
 dotfiles:
-  - src: init.vim
-    dest: "{{ ansible_facts['env']['HOME'] }}/.config/nvim/init.vim"
+  - src: init.lua
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/nvim/init.lua"
   - src: config.lua
     dest: "{{ ansible_facts['env']['HOME'] }}/.config/nvim/lua/config.lua"
   - src: vim_pack.lua
