@@ -1,8 +1,4 @@
-local plugin_manager = vim.env.NVIM_USE_PACKER == "1"
-    and "config.packer"
-    or "config.vim_pack"
-
-require(plugin_manager)
+require("config.vim_pack")
 
 --- Obsidian Config
 vim.api.nvim_set_keymap('n', '<Leader>on', ':ObsidianDailies<CR>', { noremap = true, silent = true })

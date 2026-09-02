@@ -1,12 +1,7 @@
-packer_dest: "~/.local/share/nvim/site/pack/packer/start/packer.nvim"
-packer_repo: "https://github.com/wbthomason/packer.nvim"
-
 dotfiles:
   - src: init.vim
     dest: "{{ ansible_facts['env']['HOME'] }}/.config/nvim/init.vim"
   - src: config.lua
     dest: "{{ ansible_facts['env']['HOME'] }}/.config/nvim/lua/config.lua"
-  - src: packer.lua
-    dest: "{{ ansible_facts['env']['HOME'] }}/.config/nvim/lua/config/packer.lua"
   - src: vim_pack.lua
     dest: "{{ ansible_facts['env']['HOME'] }}/.config/nvim/lua/config/vim_pack.lua"

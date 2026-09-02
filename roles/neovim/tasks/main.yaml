@@ -13,34 +13,7 @@
 - name: Symlink neovim dotfiles
   ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/symlink_dotfiles.yaml"
 
-# Packer installation (cross-platform)
-- name: Check if Packer is already installed
-  ansible.builtin.stat:
-    path: "{{ packer_dest }}"
-  register: packer_stat
-
-- name: Clone Packer repository
-  ansible.builtin.git:
-    repo: "{{ packer_repo }}"
-    dest: "{{ packer_dest }}"
-    depth: 1
-    update: no
-  when: not packer_stat.stat.exists
-
-- name: Detect GOROOT via brew prefix
-  ansible.builtin.shell: echo "$(brew --prefix go)/libexec"
-  environment:
-    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
-  register: goroot_result
-  changed_when: false
-  failed_when: false
-
-- name: Install Packer plugins headlessly
-  ansible.builtin.shell: >
-    nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
-  environment:
-    PATH: "/opt/homebrew/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
-    GOROOT: "{{ goroot_result.stdout | default('') }}"
-    GOPATH: "{{ ansible_facts['env']['HOME'] }}/go"
-  changed_when: true
-  timeout: 300
+- name: Remove obsolete Packer installation
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.local/share/nvim/site/pack/packer/start/packer.nvim"
+    state: absent
