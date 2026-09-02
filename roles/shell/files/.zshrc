@@ -297,6 +297,7 @@ export PATH="$PATH:$HOME/go/src/github.com/pietdaniel/tq/bin"
 alias cdtq="cd $HOME/go/src/github.com/pietdaniel/tq"
 
 alias oc=opencode
+alias x=codex
 
 # ===========================================
 # Shell Integrations (load last)
