@@ -84,6 +84,12 @@ elif ! jq -e . >/dev/null 2>&1 <<< "$payload"; then
   debug_log "JSON parsing skipped: payload is not valid JSON"
 else
   debug_log "JSON payload validated"
+  client="$(jq -r '.client // ""' <<< "$payload")"
+  if [[ "$client" == "Codex Desktop" ]]; then
+    debug_log "Notification suppressed: Codex Desktop client"
+    exit 0
+  fi
+
   # Codex runs a hidden turn to generate the short title shown in its UI. Its
   # completion is delivered through the same notification hook as real turns,
   # but the JSON response (for example, {"title":"Fix tests"}) is not a user-
