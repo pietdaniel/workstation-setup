@@ -11,6 +11,19 @@
     state: directory
     mode: '0700'
 
+- name: Ensure Codex rules directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.codex/rules"
+    state: directory
+    mode: '0700'
+
+- name: Symlink managed Codex default rules
+  ansible.builtin.file:
+    src: "{{ role_path }}/files/rules/default.rules"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.codex/rules/default.rules"
+    state: link
+    force: true
+
 - name: Check existing Codex config
   ansible.builtin.stat:
     path: "{{ ansible_facts['env']['HOME'] }}/.codex/config.toml"

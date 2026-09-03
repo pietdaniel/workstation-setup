@@ -29,13 +29,13 @@ needed to set up the workstation.
 
 `roles/codex/files/config.toml` contains portable Codex preferences and is
 used only to seed `~/.codex/config.toml` on a machine where that file does not
-yet exist. The role installs the macOS Codex cask, but never replaces, merges,
-or symlinks an existing config.
+yet exist. `roles/codex/files/rules/default.rules` is the managed default rules
+file; the Codex role symlinks it to `~/.codex/rules/default.rules`.
 
 The seed intentionally excludes authentication, project trust, hook trust
 hashes, desktop device IDs, plugin and marketplace discovery, MCP runtime
-paths, and history/databases. Once seeded, all Codex-managed changes stay local
-to that machine and never modify this repository.
+paths, and history/databases. Update the managed rules file in this repository
+and rerun the playbook to apply it on another machine.
 
 # TODO
 
