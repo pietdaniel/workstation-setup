@@ -143,7 +143,12 @@ require("mason-lspconfig").setup({
     "ts_ls",
     "lua_ls",
     "gopls",
-    "kotlin_language_server",
+    "kotlin_lsp",
+  },
+  -- Mason otherwise enables every installed server, including the deprecated
+  -- kotlin-language-server package if it is still present locally.
+  automatic_enable = {
+    exclude = { "kotlin_language_server" },
   },
   handlers = {
     lsp_zero.default_setup,
@@ -167,16 +172,12 @@ vim.lsp.config('ty', {
 -- Required: Enable the language server
 vim.lsp.enable('ty')
 
-vim.lsp.config("kotlin_language_server", {
-  root_markers = {
-    "settings.gradle.kts",
-    "settings.gradle",
-    "build.gradle.kts",
-    "build.gradle",
-    ".git",
-  },
+-- JetBrains' official Kotlin language server.  Its nvim-lspconfig preset uses
+-- the Mason-provided `intellij-server --stdio` command and Gradle/Maven roots.
+vim.lsp.config("kotlin_lsp", {
+  single_file_support = false,
 })
-vim.lsp.enable("kotlin_language_server")
+vim.lsp.enable("kotlin_lsp")
 
 local gradle_root_markers = {
   "settings.gradle.kts",
