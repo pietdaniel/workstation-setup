@@ -1,0 +1,5 @@
+---
+# Dispatcher: Codex is installed by Homebrew on macOS.
+- name: Include Darwin (macOS) Codex tasks
+  ansible.builtin.include_tasks: darwin.yaml
+  when: ansible_facts['os_family'] == "Darwin"

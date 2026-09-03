@@ -1,0 +1,29 @@
+# Portable Codex preferences used to seed a new ~/.codex/config.toml. After
+# seeding, Codex owns the live config and its machine-local state.
+model = "gpt-5.6-terra"
+model_reasoning_effort = "medium"
+
+# The final argument is a dummy $0 for `sh -c`; Codex appends its JSON payload
+# after it, where the notifier receives it as an argument.
+notify = ["/bin/sh", "-lc", "exec \"$HOME/scripts/notifier/codex-notifier.sh\" \"$@\"", "codex-notify"]
+
+[tui]
+theme = "gruvbox-dark"
+
+[[hooks.PreToolUse]]
+matcher = "^request_user_input$"
+
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "/bin/sh -lc '$HOME/scripts/notifier/codex-notifier.sh'"
+async = true
+timeout = 5
+
+[[hooks.PermissionRequest]]
+matcher = ".*"
+
+[[hooks.PermissionRequest.hooks]]
+type = "command"
+command = "/bin/sh -lc '$HOME/scripts/notifier/codex-notifier.sh'"
+async = true
+timeout = 5

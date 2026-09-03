@@ -1,0 +1,24 @@
+---
+- name: Install Codex via Homebrew Cask
+  community.general.homebrew_cask:
+    name: codex
+    state: present
+    accept_external_apps: true
+
+- name: Ensure Codex config directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.codex"
+    state: directory
+    mode: '0700'
+
+- name: Check existing Codex config
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['env']['HOME'] }}/.codex/config.toml"
+  register: codex_config
+
+- name: Seed Codex config on first install
+  ansible.builtin.copy:
+    src: config.toml
+    dest: "{{ ansible_facts['env']['HOME'] }}/.codex/config.toml"
+    mode: '0600'
+  when: not codex_config.stat.exists

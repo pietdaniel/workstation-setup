@@ -21,3 +21,5 @@
       tags: neovim
     - role: opencode
       tags: opencode
+    - role: codex
+      tags: codex
