@@ -85,8 +85,17 @@ elif ! jq -e . >/dev/null 2>&1 <<< "$payload"; then
 else
   debug_log "JSON payload validated"
   client="$(jq -r '.client // ""' <<< "$payload")"
-  if [[ "$client" == "Codex Desktop" ]]; then
-    debug_log "Notification suppressed: Codex Desktop client"
+  allowed_clients=("codex-tui")
+  client_allowed=false
+  for allowed_client in "${allowed_clients[@]}"; do
+    if [[ "$client" == "$allowed_client" ]]; then
+      client_allowed=true
+      break
+    fi
+  done
+
+  if [[ "$client_allowed" != true ]]; then
+    debug_log "Notification suppressed: client '$client' is not allowlisted"
     exit 0
   fi
 
