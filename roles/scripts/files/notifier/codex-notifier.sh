@@ -84,19 +84,26 @@ elif ! jq -e . >/dev/null 2>&1 <<< "$payload"; then
   debug_log "JSON parsing skipped: payload is not valid JSON"
 else
   debug_log "JSON payload validated"
-  client="$(jq -r '.client // ""' <<< "$payload")"
-  allowed_clients=("codex-tui")
-  client_allowed=false
-  for allowed_client in "${allowed_clients[@]}"; do
-    if [[ "$client" == "$allowed_client" ]]; then
-      client_allowed=true
-      break
-    fi
-  done
+  event_type="$(jq -r '.type // .hook_event_name // .hookEventName // "notification"' <<< "$payload")"
 
-  if [[ "$client_allowed" != true ]]; then
-    debug_log "Notification suppressed: client '$client' is not allowlisted"
-    exit 0
+  # Completion notifications carry a client identifier, but hook payloads
+  # (such as PermissionRequest and PreToolUse) do not. Restricting every
+  # event by client therefore suppresses all client-less hooks.
+  if [[ "$event_type" == "agent-turn-complete" ]]; then
+    client="$(jq -r '.client // ""' <<< "$payload")"
+    allowed_clients=("codex-tui")
+    client_allowed=false
+    for allowed_client in "${allowed_clients[@]}"; do
+      if [[ "$client" == "$allowed_client" ]]; then
+        client_allowed=true
+        break
+      fi
+    done
+
+    if [[ "$client_allowed" != true ]]; then
+      debug_log "Notification suppressed: client '$client' is not allowlisted"
+      exit 0
+    fi
   fi
 
   # Codex runs a hidden turn to generate the short title shown in its UI. Its
@@ -112,7 +119,6 @@ else
     exit 0
   fi
 
-  event_type="$(jq -r '.type // .hook_event_name // .hookEventName // "notification"' <<< "$payload")"
   cwd="$(jq -r '.cwd // ""' <<< "$payload")"
   body="$(jq -r '."last-assistant-message" // .message // .reason // empty' <<< "$payload")"
 
