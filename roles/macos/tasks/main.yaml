@@ -27,12 +27,6 @@
 - name: Symlink macos dotfiles
   ansible.builtin.include_tasks: "{{ playbook_dir }}/roles/common/tasks/symlink_dotfiles.yaml"
 
-# System settings
-- name: Set keyboard preferences (Caps Lock <-> Escape swap)
-  ansible.builtin.command: >
-    hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x700000039,"HIDKeyboardModifierMappingDst":0x700000029},{"HIDKeyboardModifierMappingSrc":0x700000029,"HIDKeyboardModifierMappingDst":0x700000039}]}'
-  changed_when: false
-
 - name: Configure Dock (left, autohide, small icons)
   become: no
   ansible.builtin.shell: |

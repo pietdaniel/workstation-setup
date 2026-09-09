@@ -40,6 +40,7 @@
   ansible.builtin.user:
     name: "{{ ansible_facts['user_id'] }}"
     shell: /bin/zsh
+  when: ansible_facts['user_shell'] != '/bin/zsh'
 
 # Symlink dotfiles
 - name: Symlink shell dotfiles
