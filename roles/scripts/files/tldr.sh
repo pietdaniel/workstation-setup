@@ -3,7 +3,8 @@
 set -euo pipefail
 
 # MODEL="amazon-bedrock/moonshotai.kimi-k2.5"
-MODEL="amazon-bedrock/amazon.nova-micro-v1:0"
+# MODEL="amazon-bedrock/amazon.nova-micro-v1:0"
+MODEL="openai/gpt-5.6-luna-fast"
 
 Q="${*:-How do I fix 'permission denied' when running a script?}"
 

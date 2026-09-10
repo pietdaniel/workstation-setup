@@ -89,12 +89,13 @@
 # style = "bold red"
 # disabled = false  # Ensure the status module is enabled
 
+command_timeout = 3000
+
 format = """↱ $username\
 $hostname\
 $directory\
 $git_branch\
 $git_state\
-$git_status\
 $nix_shell\
 $cmd_duration\
 $python\
@@ -110,7 +111,7 @@ error_symbol = "↳ [λ](red)"
 vimcmd_symbol = "↳ [ʎ](yellow)"
 
 [git_branch]
-format = "[$branch]($style)"
+format = "[$branch]($style) "
 style = "bright-black"
 
 [git_status]
@@ -139,4 +140,4 @@ style = "bold blue"
 
 [python]
 format = "[$virtualenv]($style) "
-style = "bright-black"
+style = "yellow"

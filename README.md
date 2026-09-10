@@ -37,6 +37,10 @@ hashes, desktop device IDs, plugin and marketplace discovery, MCP runtime
 paths, and history/databases. Update the managed rules file in this repository
 and rerun the playbook to apply it on another machine.
 
-# TODO
+## Alfred preferences
 
- - alfred just command includes the whole path which is wrong
+From this repository, run `j sync-alfred-prefs` (or `just sync-alfred-prefs`).
+From another directory, run
+`just --justfile /path/to/workstation-setup/Justfile sync-alfred-prefs`.
+The recipe restores `prefs.zip` to the current user's
+`~/Library/Application Support/Alfred/Alfred.alfredpreferences` directory.
