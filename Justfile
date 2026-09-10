@@ -4,7 +4,8 @@ update-alfred-prefs:
 
 # Restores alfred preferences from this repo to the local machine
 sync-alfred-prefs:
-  unzip -o ./prefs.zip -d ~/Library/Application\ Support/Alfred/
+  mkdir -p "$HOME/Library/Application Support/Alfred"
+  unzip -o "{{justfile_directory()}}/prefs.zip" 'Alfred.alfredpreferences/*' -d "$HOME/Library/Application Support/Alfred"
 
 run-tag tag:
   ansible-playbook -vvv -i localhost, playbook.yaml --connection=local --tags={{tag}}
