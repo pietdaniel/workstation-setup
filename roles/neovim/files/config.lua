@@ -143,6 +143,7 @@ require("mason-lspconfig").setup({
     "ts_ls",
     "lua_ls",
     "gopls",
+    "rust_analyzer",
     "kotlin_lsp",
   },
   -- Mason otherwise enables every installed server, including the deprecated
