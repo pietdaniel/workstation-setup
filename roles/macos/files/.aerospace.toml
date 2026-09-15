@@ -58,6 +58,10 @@ on-mode-changed = []
     run = 'layout floating'
 
 [[on-window-detected]]
+    if.app-name-regex-substring = '^Self Service$'
+    run = 'layout floating'
+
+[[on-window-detected]]
     if.app-name-regex-substring = '^Alfred Preferences$'
     run = 'layout floating'
 
