@@ -335,6 +335,9 @@ vim.api.nvim_set_keymap(
 )
 
 --- treesitter
+-- Use Bash highlighting for shell scripts and Markdown shell fences (approximate for Zsh).
+vim.treesitter.language.register("bash", { "sh", "zsh" })
+
 -- Support both old (master) and new (main) nvim-treesitter branches
 local ts_ok, ts_configs = pcall(require, 'nvim-treesitter.configs')
 if ts_ok then
@@ -342,7 +345,7 @@ if ts_ok then
   ts_configs.setup {
     ensure_installed = {
       "c", "lua", "vim", "vimdoc", "query",
-      "javascript", "python", "go", "c_sharp", "kotlin",
+      "javascript", "python", "go", "c_sharp", "kotlin", "bash",
     },
     sync_install = false,
     auto_install = true,
@@ -357,7 +360,7 @@ else
   vim.treesitter.start = vim.treesitter.start or function() end
   require('nvim-treesitter').setup {}
   -- Install parsers if missing
-  local parsers = { "c", "lua", "vim", "vimdoc", "query", "javascript", "python", "go", "c_sharp", "kotlin" }
+  local parsers = { "c", "lua", "vim", "vimdoc", "query", "javascript", "python", "go", "c_sharp", "kotlin", "bash" }
   local installed = require('nvim-treesitter').get_installed()
   local installed_set = {}
   for _, p in ipairs(installed) do installed_set[p] = true end
