@@ -136,6 +136,64 @@ lsp_zero.extend_lspconfig()
 
 require("mason").setup({})
 
+-- Keep one server per workspace, but bound its background work. In the OpenAI
+-- monorepo, opt into builds with NVIM_RUST_PACKAGE=castiron-worker nvim.
+local rust_before_init = vim.lsp.config.rust_analyzer.before_init
+vim.lsp.config("rust_analyzer", {
+  settings = {
+    ["rust-analyzer"] = {
+      numThreads = 2,
+      cachePriming = { enable = false },
+      cargo = {
+        allTargets = false,
+        extraEnv = { CARGO_BUILD_JOBS = "2" },
+      },
+      check = { workspace = false },
+    },
+  },
+  before_init = function(params, config)
+    config.settings = vim.deepcopy(config.settings)
+    local settings = config.settings["rust-analyzer"]
+    local root = config.root_dir
+    if root and vim.uv.fs_stat(root .. "/monorepo_setup.sh") then
+      local package = vim.env.NVIM_RUST_PACKAGE
+      local focused = package ~= nil and package:match("^[%w_][%w_-]*$") ~= nil
+      settings.checkOnSave = focused
+      settings.procMacro = { enable = focused }
+      settings.cargo.buildScripts = { enable = focused }
+      if focused then
+        -- Startup macro builds and save-time checks have separate commands.
+        local command = {
+          "cargo", "check", "--package", package,
+          "--jobs", "2", "--message-format=json",
+        }
+        settings.cargo.buildScripts.overrideCommand = command
+        settings.check.overrideCommand = vim.deepcopy(command)
+      elseif package and package ~= "" then
+        vim.schedule(function()
+          vim.notify("Invalid NVIM_RUST_PACKAGE; using Rust browsing mode", vim.log.levels.WARN)
+        end)
+      end
+    end
+    -- Preserve nvim-lspconfig's initialization options and runnable commands.
+    if rust_before_init then
+      rust_before_init(params, config)
+    end
+  end,
+})
+
+-- Prioritize navigation in large OpenAPI documents over background validation.
+vim.lsp.config("yamlls", {
+  settings = {
+    yaml = {
+      validate = false,
+      completion = false,
+      schemaStore = { enable = false },
+      maxItemsComputed = 200000,
+    },
+  },
+})
+
 require("mason-lspconfig").setup({
   ensure_installed = {
     "ty",
@@ -145,6 +203,7 @@ require("mason-lspconfig").setup({
     "gopls",
     "rust_analyzer",
     "kotlin_lsp",
+    "yamlls",
   },
   -- Mason otherwise enables every installed server, including the deprecated
   -- kotlin-language-server package if it is still present locally.
