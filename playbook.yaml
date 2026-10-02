@@ -1,6 +1,10 @@
 - hosts: all
   become: no
   roles:
+    - role: macos_keyboard
+      become: no
+      when: ansible_facts['os_family'] == "Darwin"
+      tags: [macos, keyboard]
     - role: homebrew
       when: ansible_facts['os_family'] == "Darwin"
     - personal

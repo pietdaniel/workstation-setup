@@ -18,6 +18,29 @@ needed to set up the workstation.
 
 # Wiki
 
+## macOS Caps Lock → Escape
+
+The first role in the playbook, `macos_keyboard`, sets Caps Lock to Escape using
+the current user's native, host-specific Modifier Keys preferences. It discovers
+connected keyboards and preserves their other modifier mappings. The normal
+Escape key keeps its existing behavior.
+
+This uses ordinary Ansible tasks with macOS's built-in `hidutil` (discovery only),
+`defaults`, and `plutil`; there is no custom Python module or background remapper.
+
+Run just this configuration (without sudo):
+
+```sh
+ANSIBLE_BECOME_ASK_PASS=false ansible-playbook -i localhost, playbook.yaml --connection=local --tags keyboard
+```
+
+Add `--check` to preview changes. Log out and back in after applying the setting.
+If you used the retired `swap-escape-macos.sh`, restart instead to also clear its
+temporary mapping.
+Verify under System Settings → Keyboard → Keyboard Shortcuts → Modifier Keys.
+Connect external keyboards before running, or rerun this task after adding one.
+Homebrew and Ansible are installed by `run.sh` before the playbook starts.
+
 ## How to update .zshrc
 
  - Open roles/dotfiles/files/.zshrc

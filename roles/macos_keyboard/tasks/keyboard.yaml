@@ -1,0 +1,44 @@
+---
+- name: Read this keyboard's existing modifier mappings
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/plutil
+      - -extract
+      - "{{ keyboard_key | replace('.', '\\.') }}"
+      - json
+      - -o
+      - '-'
+      - '-'
+    stdin: "{{ macos_keyboard_preferences.stdout }}"
+  register: keyboard_mapping
+  changed_when: false
+  check_mode: false
+  failed_when: >-
+    keyboard_mapping.rc != 0 and
+    'No value at that key path' not in keyboard_mapping.stderr
+
+- name: Set Caps Lock to Escape, preserving other modifier mappings
+  vars:
+    current: "{{ (keyboard_mapping.stdout | from_json) if keyboard_mapping.rc == 0 else [] }}"
+    # 0 is the legacy Caps Lock code; modern macOS uses the 64-bit HID usage.
+    desired: >-
+      {{ current | rejectattr('HIDKeyboardModifierMappingSrc', 'in', [0, 30064771129]) | list
+         + [{'HIDKeyboardModifierMappingSrc': 30064771129, 'HIDKeyboardModifierMappingDst': 30064771113}] }}
+  when: current != desired
+  block:
+    - name: Save the native Modifier Keys preference
+      ansible.builtin.command: >-
+        /usr/bin/defaults -currentHost write -g {{ keyboard_key | quote }} -array
+        {% for pair in desired %}
+        '<dict><key>HIDKeyboardModifierMappingSrc</key><integer>{{ pair.HIDKeyboardModifierMappingSrc | int }}</integer>
+        <key>HIDKeyboardModifierMappingDst</key><integer>{{ pair.HIDKeyboardModifierMappingDst | int }}</integer></dict>'
+        {% endfor %}
+      changed_when: true
+
+    - name: Report keyboard preference change
+      ansible.builtin.debug:
+        msg: >-
+          {{ 'Would set' if ansible_check_mode else 'Set' }} Caps Lock to Escape for {{ item.Product }}.
+          After applying, log out and back in. If you used the old swap script,
+          restart instead to also clear its temporary mapping.
+      changed_when: ansible_check_mode

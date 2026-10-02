@@ -1,0 +1,23 @@
+---
+- name: Find connected keyboards
+  ansible.builtin.command: /usr/bin/hidutil list --matching keyboard --ndjson
+  register: macos_keyboards
+  changed_when: false
+  check_mode: false
+
+- name: Read native host-specific preferences
+  ansible.builtin.command: /usr/bin/defaults -currentHost export -g -
+  register: macos_keyboard_preferences
+  changed_when: false
+  check_mode: false
+
+- name: Configure each keyboard's Modifier Keys preference
+  ansible.builtin.include_tasks: keyboard.yaml
+  loop: >-
+    {{ macos_keyboards.stdout_lines | map('from_json')
+       | selectattr('type', 'equalto', 'service') | list }}
+  loop_control:
+    label: "{{ item.Product }}"
+  vars:
+    # macOS uses vendor-product-0, not the keyboard's LocationID.
+    keyboard_key: "com.apple.keyboard.modifiermapping.{{ item.VendorID }}-{{ item.ProductID }}-0"
