@@ -5,6 +5,10 @@
       become: no
       when: ansible_facts['os_family'] == "Darwin"
       tags: [macos, keyboard]
+    - role: macos_system_settings
+      become: no
+      when: ansible_facts['os_family'] == "Darwin"
+      tags: [macos, macos_system_settings]
     - role: homebrew
       when: ansible_facts['os_family'] == "Darwin"
     - personal

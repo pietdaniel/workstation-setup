@@ -41,6 +41,28 @@ Verify under System Settings → Keyboard → Keyboard Shortcuts → Modifier Ke
 Connect external keyboards before running, or rerun this task after adding one.
 Homebrew and Ansible are installed by `run.sh` before the playbook starts.
 
+## macOS System Settings automation
+
+`roles/macos_system_settings/` owns UI automation, with separate task files and
+AppleScripts for each settings area. Its keyboard task disables automatic
+keyboard brightness adjustment and sets the backlight brightness to zero.
+
+Run only the keyboard backlight task:
+
+```sh
+ANSIBLE_BECOME_ASK_PASS=false ansible-playbook -i localhost, playbook.yaml --connection=local --tags macos_keyboard_backlight
+```
+
+Run as the logged-in desktop user, without sudo. The app running Ansible needs
+Accessibility access under System Settings → Privacy & Security → Accessibility;
+macOS may also ask for permission to automate System Events. The script opens
+System Settings and checks the resulting control values. UI actions are skipped
+in Ansible check mode.
+
+The selectors target English System Settings on macOS 27. If Apple changes the
+layout, update `roles/macos_system_settings/files/keyboard.applescript`. A Mac
+without keyboard backlight controls reports an error rather than claiming success.
+
 ## How to update .zshrc
 
  - Open roles/dotfiles/files/.zshrc

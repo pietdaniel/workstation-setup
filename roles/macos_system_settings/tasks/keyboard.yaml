@@ -1,0 +1,8 @@
+---
+- name: Turn off keyboard backlight and automatic brightness
+  ansible.builtin.script:
+    cmd: keyboard.applescript
+    executable: /usr/bin/osascript
+  register: keyboard_backlight
+  changed_when: (keyboard_backlight.stdout | default('') | trim) == 'changed'
+  when: not ansible_check_mode
