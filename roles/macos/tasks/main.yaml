@@ -10,13 +10,6 @@
   loop:
     - nikitabobko/tap
 
-- name: Install pinentry-mac
-  become: no
-  community.general.homebrew:
-    name:
-      - pinentry-mac
-    state: present
-
 - name: Install Aerospace
   become: no
   community.general.homebrew_cask:
@@ -34,10 +27,4 @@
     defaults write com.apple.dock autohide -bool true
     defaults write com.apple.dock tilesize -int 16
     killall Dock
-  changed_when: false
-
-- name: GPG pinentry-mac Use Keychain
-  become: no
-  ansible.builtin.command: >
-    defaults write org.gpgtools.pinentry-mac DisableKeychain -bool no
   changed_when: false
