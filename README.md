@@ -73,6 +73,17 @@ ANSIBLE_BECOME_ASK_PASS=false ansible-playbook -i localhost, playbook.yaml --con
 The task selects Point & Click, moves Tracking speed to its maximum, verifies
 the slider, and closes System Settings.
 
+Run only the built-in display task (the **More Space** scaling preset):
+
+```sh
+ANSIBLE_BECOME_ASK_PASS=false ansible-playbook -i localhost, playbook.yaml --connection=local --tags macos_display
+```
+
+The task reads the rightmost of the five display scaling presets, selects it,
+verifies the active built-in display resolution, and closes System Settings.
+It expects the thumbnail view. `display.js` uses macOS's built-in JavaScript for
+Automation to read display labels that AppleScript's System Events cannot decode.
+
 Run as the logged-in desktop user, without sudo. For UI automation,
 the app running Ansible needs
 Accessibility access under System Settings → Privacy & Security → Accessibility;

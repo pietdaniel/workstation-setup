@@ -1,0 +1,9 @@
+---
+- name: Set the built-in display to More Space
+  ansible.builtin.script:
+    cmd: display.js
+    executable: /usr/bin/osascript -l JavaScript
+  register: display_settings
+  changed_when: (display_settings.stdout | default('') | trim) == 'changed'
+  when: not ansible_check_mode
+  tags: macos_display

@@ -4,3 +4,6 @@
 
 - name: Configure trackpad settings
   ansible.builtin.import_tasks: trackpad.yaml
+
+- name: Configure display settings
+  ansible.builtin.import_tasks: display.yaml
