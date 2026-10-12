@@ -1,0 +1,5 @@
+---
+- name: Reload Finder for desktop settings
+  ansible.builtin.command: /usr/bin/killall Finder
+  when: not ansible_check_mode
+  changed_when: true

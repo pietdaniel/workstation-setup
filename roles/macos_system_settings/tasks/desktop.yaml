@@ -6,3 +6,14 @@
   register: desktop_settings
   changed_when: (desktop_settings.stdout | default('') | trim) == 'changed'
   when: not ansible_check_mode
+
+- name: Configure desktop stacks and icon layout
+  ansible.builtin.script:
+    cmd: "desktop-icons.js {{ '--check' if ansible_check_mode else '' }}"
+    executable: /usr/bin/osascript -l JavaScript
+  register: desktop_icons
+  # The script implements its own read-only check mode.
+  check_mode: false
+  changed_when: (desktop_icons.stdout | default('') | trim) == 'changed'
+  notify: Reload Finder for desktop settings
+  tags: macos_desktop_icons
