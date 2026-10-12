@@ -1,3 +1,6 @@
 ---
 - name: Configure keyboard settings
   ansible.builtin.import_tasks: keyboard.yaml
+
+- name: Configure trackpad settings
+  ansible.builtin.import_tasks: trackpad.yaml

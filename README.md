@@ -64,7 +64,16 @@ Run only the keyboard backlight task:
 ANSIBLE_BECOME_ASK_PASS=false ansible-playbook -i localhost, playbook.yaml --connection=local --tags macos_keyboard_backlight
 ```
 
-Run as the logged-in desktop user, without sudo. For keyboard UI automation,
+Run only the trackpad task (maximum tracking speed):
+
+```sh
+ANSIBLE_BECOME_ASK_PASS=false ansible-playbook -i localhost, playbook.yaml --connection=local --tags macos_trackpad
+```
+
+The task selects Point & Click, moves Tracking speed to its maximum, verifies
+the slider, and closes System Settings.
+
+Run as the logged-in desktop user, without sudo. For UI automation,
 the app running Ansible needs
 Accessibility access under System Settings → Privacy & Security → Accessibility;
 macOS may also ask for permission to automate System Events. The script opens

@@ -1,0 +1,9 @@
+---
+- name: Set maximum trackpad tracking speed
+  ansible.builtin.script:
+    cmd: trackpad.applescript
+    executable: /usr/bin/osascript
+  register: trackpad_settings
+  changed_when: (trackpad_settings.stdout | default('') | trim) == 'changed'
+  when: not ansible_check_mode
+  tags: macos_trackpad
