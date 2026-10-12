@@ -1,4 +1,13 @@
 ---
+- name: Set fastest key repeat and shortest delay available in macOS Settings
+  ansible.builtin.script:
+    cmd: key-repeat.applescript
+    executable: /usr/bin/osascript
+  register: keyboard_repeat
+  changed_when: (keyboard_repeat.stdout | default('') | trim) == 'changed'
+  when: not ansible_check_mode
+  tags: macos_key_repeat
+
 - name: Turn off keyboard backlight and automatic brightness
   ansible.builtin.script:
     cmd: keyboard.applescript
@@ -6,3 +15,4 @@
   register: keyboard_backlight
   changed_when: (keyboard_backlight.stdout | default('') | trim) == 'changed'
   when: not ansible_check_mode
+  tags: macos_keyboard_backlight

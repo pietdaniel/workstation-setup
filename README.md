@@ -43,9 +43,20 @@ Homebrew and Ansible are installed by `run.sh` before the playbook starts.
 
 ## macOS System Settings automation
 
-`roles/macos_system_settings/` owns UI automation, with separate task files and
-AppleScripts for each settings area. Its keyboard task disables automatic
-keyboard brightness adjustment and sets the backlight brightness to zero.
+`roles/macos_system_settings/` groups preferences by settings area, using native
+preference tasks where possible and separate AppleScripts for UI automation.
+Its keyboard tasks configure key repeat and disable the keyboard backlight.
+
+Run only the key-repeat settings (fastest repeat and shortest delay available in
+macOS Settings: `KeyRepeat=2`, `InitialKeyRepeat=15`):
+
+```sh
+ANSIBLE_BECOME_ASK_PASS=false ansible-playbook -i localhost, playbook.yaml --connection=local --tags macos_key_repeat
+```
+
+The task moves both sliders to their rightmost positions in System Settings and
+verifies them. This applies the active settings rather than only writing saved
+preferences. It closes System Settings afterward and skips UI actions in check mode.
 
 Run only the keyboard backlight task:
 
@@ -53,14 +64,15 @@ Run only the keyboard backlight task:
 ANSIBLE_BECOME_ASK_PASS=false ansible-playbook -i localhost, playbook.yaml --connection=local --tags macos_keyboard_backlight
 ```
 
-Run as the logged-in desktop user, without sudo. The app running Ansible needs
+Run as the logged-in desktop user, without sudo. For keyboard UI automation,
+the app running Ansible needs
 Accessibility access under System Settings → Privacy & Security → Accessibility;
 macOS may also ask for permission to automate System Events. The script opens
 System Settings and checks the resulting control values. UI actions are skipped
 in Ansible check mode.
 
 The selectors target English System Settings on macOS 27. If Apple changes the
-layout, update `roles/macos_system_settings/files/keyboard.applescript`. A Mac
+layout, update the scripts in `roles/macos_system_settings/files/`. A Mac
 without keyboard backlight controls reports an error rather than claiming success.
 
 ## How to update .zshrc
