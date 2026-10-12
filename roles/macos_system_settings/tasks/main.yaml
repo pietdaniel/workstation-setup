@@ -11,3 +11,7 @@
 - name: Configure appearance settings
   ansible.builtin.import_tasks: appearance.yaml
   tags: macos_appearance
+
+- name: Configure desktop settings
+  ansible.builtin.import_tasks: desktop.yaml
+  tags: macos_desktop

@@ -1,0 +1,8 @@
+---
+- name: Set desktop backgrounds to solid black
+  ansible.builtin.script:
+    cmd: desktop.applescript
+    executable: /usr/bin/osascript
+  register: desktop_settings
+  changed_when: (desktop_settings.stdout | default('') | trim) == 'changed'
+  when: not ansible_check_mode

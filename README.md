@@ -94,6 +94,17 @@ The task disables automatic appearance switching and applies Dark immediately
 through System Events' appearance API. No logout is required; System Settings is
 closed afterward if open. In check mode, only the saved Auto preference is checked.
 
+Run only the desktop background task (solid black):
+
+```sh
+ANSIBLE_BECOME_ASK_PASS=false ansible-playbook -i localhost, playbook.yaml --connection=local --tags macos_desktop
+```
+
+The task applies macOS's bundled `Solid Colors/Black.png` to each desktop exposed
+by System Events on the connected displays and verifies the saved picture paths.
+It does not open System Settings. Additional Spaces or displays added later may
+need the task rerun. Desktop changes are skipped in check mode.
+
 Run as the logged-in desktop user, without sudo. For UI automation,
 the app running Ansible needs
 Accessibility access under System Settings → Privacy & Security → Accessibility;
