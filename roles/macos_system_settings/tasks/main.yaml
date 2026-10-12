@@ -7,3 +7,7 @@
 
 - name: Configure display settings
   ansible.builtin.import_tasks: display.yaml
+
+- name: Configure appearance settings
+  ansible.builtin.import_tasks: appearance.yaml
+  tags: macos_appearance

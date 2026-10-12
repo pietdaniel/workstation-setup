@@ -1,0 +1,15 @@
+---
+- name: Disable automatic light and dark appearance switching
+  community.general.osx_defaults:
+    domain: NSGlobalDomain
+    key: AppleInterfaceStyleSwitchesAutomatically
+    type: bool
+    value: false
+
+- name: Apply dark appearance immediately
+  ansible.builtin.script:
+    cmd: appearance.applescript
+    executable: /usr/bin/osascript
+  register: appearance_settings
+  changed_when: (appearance_settings.stdout | default('') | trim) == 'changed'
+  when: not ansible_check_mode

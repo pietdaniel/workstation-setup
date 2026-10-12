@@ -84,6 +84,16 @@ verifies the active built-in display resolution, and closes System Settings.
 It expects the thumbnail view. `display.js` uses macOS's built-in JavaScript for
 Automation to read display labels that AppleScript's System Events cannot decode.
 
+Run only appearance settings (always **Dark**, rather than Auto):
+
+```sh
+ANSIBLE_BECOME_ASK_PASS=false ansible-playbook -i localhost, playbook.yaml --connection=local --tags macos_appearance
+```
+
+The task disables automatic appearance switching and applies Dark immediately
+through System Events' appearance API. No logout is required; System Settings is
+closed afterward if open. In check mode, only the saved Auto preference is checked.
+
 Run as the logged-in desktop user, without sudo. For UI automation,
 the app running Ansible needs
 Accessibility access under System Settings → Privacy & Security → Accessibility;
