@@ -20,6 +20,6 @@ function run(args) {
     if (args.indexOf('--check') !== -1) return 'changed';
 
     defaults.setObjectForKey($(desired), 'DesktopViewSettings');
-    if (!defaults.synchronize()) throw Error('Could not save Finder desktop preferences.');
+    if (!defaults.synchronize) throw Error('Could not save Finder desktop preferences.');
     return 'changed';
 }

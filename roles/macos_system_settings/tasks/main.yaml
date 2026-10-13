@@ -15,3 +15,10 @@
 - name: Configure desktop settings
   ansible.builtin.import_tasks: desktop.yaml
   tags: macos_desktop
+
+- name: Configure screenshot shortcuts
+  ansible.builtin.import_tasks: shortcuts.yaml
+  tags: macos_screenshot_shortcuts
+
+- name: Configure sound settings
+  ansible.builtin.import_tasks: sound.yaml

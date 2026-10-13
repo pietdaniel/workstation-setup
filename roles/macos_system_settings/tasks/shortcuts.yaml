@@ -1,0 +1,21 @@
+---
+- name: Swap region screenshot clipboard and file shortcuts
+  ansible.builtin.script:
+    cmd: "screenshot-shortcuts.js {{ '--check' if ansible_check_mode else '' }}"
+    executable: /usr/bin/osascript -l JavaScript
+  register: screenshot_shortcuts
+  # The script supports a read-only preview.
+  check_mode: false
+  changed_when: (screenshot_shortcuts.stdout | default('') | trim) == 'changed'
+
+- name: Show the floating thumbnail for screenshots saved to a file
+  community.general.osx_defaults:
+    domain: com.apple.screencapture
+    key: show-thumbnail
+    type: bool
+    value: true
+
+- name: Activate the saved keyboard shortcuts for the current session
+  ansible.builtin.command: /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
+  when: not ansible_check_mode
+  changed_when: false

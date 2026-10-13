@@ -1,0 +1,9 @@
+---
+- name: Disable screenshot shutter and other user interface sound effects
+  ansible.builtin.script:
+    cmd: sound.applescript
+    executable: /usr/bin/osascript
+  register: sound_settings
+  changed_when: (sound_settings.stdout | default('') | trim) == 'changed'
+  when: not ansible_check_mode
+  tags: [macos_sound, macos_screenshot_sound]

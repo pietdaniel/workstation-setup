@@ -119,6 +119,30 @@ ANSIBLE_BECOME_ASK_PASS=false ansible-playbook -i localhost, playbook.yaml --con
 Remove `--check` to apply. Check mode reads preferences without changing them or
 restarting Finder.
 
+Run only the region screenshot shortcuts:
+
+```sh
+ANSIBLE_BECOME_ASK_PASS=false ansible-playbook -i localhost, playbook.yaml --connection=local --tags macos_screenshot_shortcuts
+```
+
+**Cmd+Shift+4** copies a selected area to the clipboard. **Control+Cmd+Shift+4**
+saves it to a file with the floating thumbnail enabled. Full-screen screenshot
+shortcuts and the existing save location are preserved. The task updates the
+native shortcut preferences and activates them for the current session. Add
+`--check` for a read-only preview.
+
+Disable the screenshot shutter sound:
+
+```sh
+ANSIBLE_BECOME_ASK_PASS=false ansible-playbook -i localhost, playbook.yaml --connection=local --tags macos_screenshot_sound
+```
+
+This turns off **Sound → Play user interface sound effects**, which also silences
+other interface effects such as moving files to Trash. It does not mute app audio
+or change output volume, startup sound, or volume-key feedback. The task verifies
+the switch and closes System Settings afterward. UI actions are skipped in check
+mode. It also runs as part of the full bootstrap or with the `macos_sound` tag.
+
 Run as the logged-in desktop user, without sudo. For UI automation,
 the app running Ansible needs
 Accessibility access under System Settings → Privacy & Security → Accessibility;
