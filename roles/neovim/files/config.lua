@@ -1,4 +1,5 @@
 require("config.vim_pack")
+local tools = require("config.tools")
 
 vim.opt.smartindent = true
 vim.opt.number = true
@@ -195,16 +196,7 @@ vim.lsp.config("yamlls", {
 })
 
 require("mason-lspconfig").setup({
-  ensure_installed = {
-    "ty",
-    "eslint",
-    "ts_ls",
-    "lua_ls",
-    "gopls",
-    "rust_analyzer",
-    "kotlin_lsp",
-    "yamlls",
-  },
+  ensure_installed = tools.servers,
   -- Mason otherwise enables every installed server, including the deprecated
   -- kotlin-language-server package if it is still present locally.
   automatic_enable = {
@@ -402,10 +394,7 @@ local ts_ok, ts_configs = pcall(require, 'nvim-treesitter.configs')
 if ts_ok then
   -- Old API (master branch)
   ts_configs.setup {
-    ensure_installed = {
-      "c", "lua", "vim", "vimdoc", "query",
-      "javascript", "python", "go", "c_sharp", "kotlin", "bash",
-    },
+    ensure_installed = tools.parsers,
     sync_install = false,
     auto_install = true,
     ignore_install = { "javascript" },
@@ -419,7 +408,7 @@ else
   vim.treesitter.start = vim.treesitter.start or function() end
   require('nvim-treesitter').setup {}
   -- Install parsers if missing
-  local parsers = { "c", "lua", "vim", "vimdoc", "query", "javascript", "python", "go", "c_sharp", "kotlin", "bash" }
+  local parsers = tools.parsers
   local installed = require('nvim-treesitter').get_installed()
   local installed_set = {}
   for _, p in ipairs(installed) do installed_set[p] = true end

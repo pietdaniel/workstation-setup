@@ -27,3 +27,15 @@
   ansible.builtin.file:
     path: "{{ ansible_facts['env']['HOME'] }}/.config/nvim/plugin/packer_compiled.lua"
     state: absent
+
+- name: Install Neovim plugins, language servers, and syntax parsers
+  ansible.builtin.command:
+    argv:
+      - nvim
+      - --headless
+      - -u
+      - NONE
+      - -l
+      - "{{ role_path }}/files/bootstrap.lua"
+  register: neovim_bootstrap
+  changed_when: "'Installing ' in neovim_bootstrap.stdout or 'Installing ' in neovim_bootstrap.stderr"

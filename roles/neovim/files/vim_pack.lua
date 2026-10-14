@@ -8,6 +8,9 @@ end
 
 vim.api.nvim_create_autocmd("PackChanged", {
   callback = function(event)
+    if vim.g.workstation_bootstrap then
+      return
+    end
     if event.data.spec.name ~= "markdown-preview.nvim" then
       return
     end
@@ -62,9 +65,13 @@ vim.pack.add({
   gh("mfussenegger/nvim-dap"),
   gh("nvim-java/nvim-java"),
   -- end java block
-})
+}, { confirm = not vim.g.workstation_bootstrap, load = vim.g.workstation_bootstrap or nil })
 
 -- setup java
+if vim.g.workstation_bootstrap then
+  return
+end
+
 require("java").setup()
 
 vim.lsp.config("jdtls", {

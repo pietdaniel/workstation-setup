@@ -1,10 +1,6 @@
 # TODO
 
-
- - Fix working-directory and Homebrew PATH assumptions.
-
  - Handle Homebrew trust, locks, and visible progress.
- - Install Chrome and make it default before GitHub login.
  - Show GitHub login/SSO prompts; finish key registration and signing.
 
  - Install Neovim plugins/tools during setup, not first launch.
