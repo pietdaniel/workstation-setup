@@ -1,17 +1,14 @@
 # TODO
 
- - Install/wait for Xcode tools before cloning.
+
  - Fix password prompts when running through curl | bash.
  - Fix working-directory and Homebrew PATH assumptions.
- - Offer macOS upgrade before installing packages.
+
  - Handle Homebrew trust, locks, and visible progress.
  - Install Chrome and make it default before GitHub login.
  - Show GitHub login/SSO prompts; finish key registration and signing.
+
  - Install Neovim plugins/tools during setup, not first launch.
- - Apply black wallpaper, tiny sorted icons, and display resolution.
- - Set mouse/trackpad speed, key repeat, and disable smart quotes.
- - Guide macOS permission requests and close Settings afterward.
- - Verify completion, report remaining steps, and play a sound.
  - Keep reruns safe so failures don’t mean starting over.
 
 

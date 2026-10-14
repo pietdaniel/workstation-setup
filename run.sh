@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+# When bootstrap runs through curl | bash, inherit keyboard input for prompts
+# instead of the pipe containing the bootstrap script.
+if [[ ! -t 0 ]] && ( : < /dev/tty ) 2>/dev/null; then
+    exec < /dev/tty
+fi
+
 # Detect OS
 detect_os() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -73,4 +79,3 @@ else
     echo "Failed to install Ansible. Exiting..."
     exit 1
 fi
-
