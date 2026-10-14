@@ -1,7 +1,6 @@
 # TODO
 
 
- - Fix password prompts when running through curl | bash.
  - Fix working-directory and Homebrew PATH assumptions.
 
  - Handle Homebrew trust, locks, and visible progress.

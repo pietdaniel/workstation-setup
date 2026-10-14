@@ -14,3 +14,18 @@
 - name: Update Homebrew
   community.general.homebrew:
     update_homebrew: yes
+
+- name: Install Chrome
+  community.general.homebrew_cask:
+    name: google-chrome
+    state: present
+
+- name: Ask Chrome to become the default browser
+  ansible.builtin.command:
+    argv:
+      - open
+      - -a
+      - Google Chrome
+      - --args
+      - --make-default-browser
+  changed_when: false
