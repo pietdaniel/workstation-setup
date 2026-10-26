@@ -15,10 +15,31 @@
   community.general.homebrew:
     update_homebrew: yes
 
-- name: Install Chrome
+- name: Check if Chrome is already installed
+  ansible.builtin.stat:
+    path: /Applications/Google Chrome.app
+  register: chrome_app
+
+- name: Install Chrome when missing
   community.general.homebrew_cask:
     name: google-chrome
     state: present
+  when: not chrome_app.stat.exists
+  environment:
+    # Google's rolling download has no fixed checksum; retain other cask options.
+    HOMEBREW_CASK_OPTS: "{{ ansible_facts['env'].get('HOMEBREW_CASK_OPTS', '') | replace('--require-sha', '') }}"
+
+- name: Verify Chrome is signed by Google
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/codesign
+      - --verify
+      - --deep
+      - --strict
+      - -R
+      - '=anchor apple generic and certificate leaf[subject.OU] = "EQHXZ8M8AV"'
+      - /Applications/Google Chrome.app
+  changed_when: false
 
 - name: Ask Chrome to become the default browser
   ansible.builtin.command:
